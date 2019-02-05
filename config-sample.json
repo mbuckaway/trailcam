@@ -1,0 +1,35 @@
+{
+    "camera": {
+        "device": "/dev/video0",
+        "delay": 2
+    },
+    "sensor":
+    {
+        "sea_level_pressure": 1029.00,
+        "address": 118
+    },
+    "image":
+    {
+        "width" : 1024,
+        "height" : 768,
+        "filename": "/home/user/webcam.jpg"
+    },
+    "ftp": {
+        "enabled": true,
+        "server" : "servername",
+        "user" : "webcam",
+        "password" : "password",
+        "remotefile": "webcam.jpg"
+    },
+    "twitter":
+    {
+        "enabled": false,
+        "ConsumerKey": "CONSUMER KEY",
+        "ConsumerSecret": "CONSUMER SECRET",
+        "AccessKey" : "ACCESS KEY",
+        "AccessSecret": "ACCESS SECRET"
+    },
+    "timestamp": {
+        "filename": "/home/user/timestamp.json"
+    }
+}

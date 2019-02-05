@@ -1,2 +1,2 @@
 # trailcam
-Webcam Utility for Raspberry PI
+Webcam Utility for a Raspberry PI intended for the Hydrocut
