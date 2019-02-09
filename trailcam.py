@@ -12,6 +12,7 @@ import json
 import logging
 import ephem
 import math
+from pathlib import PosixPath
 from logging_configurator import configure_logging
 from picamera import PiCamera
 from PIL import Image, ImageFont, ImageDraw
@@ -59,7 +60,7 @@ def tempdata(addressvalue, sea_level_pressure):
     logging.debug("Getting temperature...")
     temp = "Temp: %0.1fC " % bmp280.temperature
     pres = "Barometer: %0.1fhPa " % bmp280.pressure
-    alti = "Altitute: %0.2fm " % bmp280.altitude
+    #alti = "Altitute: %0.2fm " % bmp280.altitude
     data = temp + pres
     logging.info(data)
     return data
@@ -68,16 +69,21 @@ def snapshotPiCamera(isdaytime, width, height, filename):
     with PiCamera() as camera:
         camera.resolution = (width, height)
         camera.awb_mode = 'auto'
-        camera.exif_tags['IFD0.Copyright'] = 'Copyright (c) 2013 Foo Industries'
+        camera.rotation = 180
+        camera.exif_tags['IFD0.Copyright'] = 'Copyright (c) 2019 Waterloo Cycling Club'
         camera.exif_tags['EXIF.UserComment'] = "Hydrocut Web Cam"
         # Get the time and see if we should be using night mode
         if isdaytime:
-            camera.exposure_mode = 'beach'
+            #camera.exposure_mode = 'beach'
             camera.iso = 100
         else:
-            camera.exposure_mode = 'night'
-            camera.iso = 400
+            #camera.exposure_mode = 'nightpreview'
+            camera.iso = 1200
+            camera.brightness = 60
         try:
+            time.sleep(2)
+            camera.capture(filename, format='jpeg', use_video_port=False)
+            time.sleep(1)
             camera.capture(filename, format='jpeg', use_video_port=False)
         except:
             logging.error("Camera was unable to capture an image")
@@ -134,11 +140,29 @@ def annotate(filename, weather):
 def ftpfile(server, user, password, filename, remotefile):
     logging.info("Uploading file to " + server + " as " + remotefile)
     try:
+        now = datetime.datetime.now()
+        path = PosixPath(remotefile)
+        directory = now.strftime("%Y%U")
+        archivefilename = directory + "/" + path.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + path.suffix
         session = ftplib.FTP(server,user,password)
+        # make a new directory and don't complain if it's already there
+        logging.info("Storing old image in " + directory + " as " + archivefilename)
+        try:
+            session.mkd(directory)
+        except:
+            logging.warn("Error creating directory (ignored)")
+        try:
+            logging.debug("Renaming " + remotefile + " to " + archivefilename)
+            session.rename(remotefile, archivefilename)
+        except:
+            logging.error("Error archiving file")
+
         photo = open(filename,'rb')                  # file to send
         session.storbinary('STOR ' + remotefile, photo)     # send the file
         photo.close()                                    # close file and FTP
         session.quit()
+        session.close()
+        logging.info("Upload completed successfully.")
     except:
         logging.error('Failed to FTP file')
 
