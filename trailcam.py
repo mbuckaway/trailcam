@@ -10,11 +10,12 @@ import ftplib
 import argparse
 import json
 import logging
+import ephem
+import math
 from logging_configurator import configure_logging
-
+from picamera import PiCamera
 from PIL import Image, ImageFont, ImageDraw
 import select
-import time
 import v4l2capture
 from twython import Twython
 
@@ -23,6 +24,7 @@ configure_logging()
 verbose = False
 ftpEnabled = True
 twitterEnabled = True
+sensorEnabled = True
 
 def vprint(string):
     logging.debug(string)
@@ -31,6 +33,21 @@ def getconfig(configfile):
     with open(configfile) as json_data:
         config = json.load(json_data)
     return config
+
+def isdaytime(lat, logi, elevation):
+    sun = ephem.Sun()
+    observer = ephem.Observer()
+    #  Define your coordinates here
+    observer.lat, observer.lon, observer.elevation = lat, logi, elevation
+    # Set the time (UTC) here
+    observer.date = datetime.datetime.utcnow()
+    sun.compute(observer)
+    current_sun_alt = sun.alt*180/math.pi
+    result = True
+    # If the sun is -6 or greater, we are nightime
+    if (current_sun_alt<-6):
+        result = False
+    return result
 
 def tempdata(addressvalue, sea_level_pressure):
     # Create library object using our Bus I2C port
@@ -43,9 +60,27 @@ def tempdata(addressvalue, sea_level_pressure):
     temp = "Temp: %0.1fC " % bmp280.temperature
     pres = "Barometer: %0.1fhPa " % bmp280.pressure
     alti = "Altitute: %0.2fm " % bmp280.altitude
-    data = temp + pres + alti
+    data = temp + pres
     logging.info(data)
     return data
+
+def snapshotPiCamera(isdaytime, width, height, filename):
+    with PiCamera() as camera:
+        camera.resolution = (width, height)
+        camera.awb_mode = 'auto'
+        camera.exif_tags['IFD0.Copyright'] = 'Copyright (c) 2013 Foo Industries'
+        camera.exif_tags['EXIF.UserComment'] = "Hydrocut Web Cam"
+        # Get the time and see if we should be using night mode
+        if isdaytime:
+            camera.exposure_mode = 'beach'
+            camera.iso = 100
+        else:
+            camera.exposure_mode = 'night'
+            camera.iso = 400
+        try:
+            camera.capture(filename, format='jpeg', use_video_port=False)
+        except:
+            logging.error("Camera was unable to capture an image")
 
 def snapshotv4l(device, width, height, filename, delay):
     logging.info("Taking photo from device: " + device)
@@ -126,6 +161,7 @@ parser.add_argument('-L', '--loglevel', default='INFO', help='logging level (def
 parser.add_argument('-c', '--config', default='config.json', help='config filename')
 parser.add_argument('-f', '--ftp', action='store_false', help='disable ftp')
 parser.add_argument('-t', '--twitter', action='store_false', help='disable twitter')
+parser.add_argument('-s', '--sensor', action='store_false', help='disable temperator sensor')
 parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
 
 args = parser.parse_args()
@@ -149,6 +185,11 @@ if (args.twitter == False):
     logging.warn("Twitter Disabled!")
     twitterEnabled = False
 
+sensorEnabled = config['sensor']['enabled']
+if (args.sensor == False):
+    logging.warn("Sensor Disabled!")
+    sensorEnabled = False
+
 logging.debug("Camera device: " + config['camera']['device'])
 logging.debug("Sensor Address: " + format(config['sensor']['address'], '#04x'))
 logging.debug("Image size: " + str(config['image']['width']) + "x" + str(config['image']['height']))
@@ -157,8 +198,19 @@ logging.debug("Ftp Server: " + config['ftp']['server'])
 logging.debug("Ftp User: " + config['ftp']['user'])
 
 # Load the temperature data
-weather = tempdata(config['sensor']['address'], config['sensor']['sea_level_pressure'])
-snapshotv4l(config['camera']['device'], config['image']['width'], config['image']['height'], config['image']['filename'], config['camera']['delay'])
+if (sensorEnabled == True):
+    weather = tempdata(config['sensor']['address'], config['sensor']['sea_level_pressure'])
+else:
+    weather = ''
+
+if (config['camera']['type'] == 'pi'):
+    logging.debug("Using PI camera")
+    isdaytime = isdaytime(config['camera']['latitude'], config['camera']['longitude'], config['camera']['elevation'])
+    logging.info("System is in day mode: " + str(isdaytime))
+    snapshotPiCamera(isdaytime, config['image']['width'], config['image']['height'], config['image']['filename'])
+else:    
+    logging.debug("Using USB camera")
+    snapshotv4l(config['camera']['device'], config['image']['width'], config['image']['height'], config['image']['filename'], config['camera']['delay'])
 
 if (twitterEnabled):
     twitterpost(config['image']['filename'], config['twitter'], weather)
