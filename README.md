@@ -1,6 +1,6 @@
 # Trailcam
 
-This program is a simple Webcam Utility for a Raspberry PI. The intend is a remote webcam connected to a 4G modem and put on a 12V car battery and put into the forest.
+This program is a simple Webcam Utility for a Raspberry PI. Currently, the system runs on a PI Zero W and is connected to a 4G modem via WIFI, connected to a 12V to USB power supply connected to a 12V car battery. The entire thing was put in a waterproof box and put into the forest at the Hydrocut (http://thehydrocut.ca)
 
 The utility is meant to be run on a cron job and can post to a ftp site and a twitter account. It also has the ability to read temperature and pressure from the BMP280 temperature sensor on the I2C bus. All things are configurable in the config.json config file.
 
