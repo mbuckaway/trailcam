@@ -58,7 +58,7 @@ def tempdata(addressvalue, sea_level_pressure):
     # change this to match the location's pressure (hPa) at sea level
     bmp280.sea_level_pressure = sea_level_pressure
     logging.debug("Getting temperature...")
-    temp = "Temp: %0.1fC " % bmp280.temperature
+    temp = "Temp: %0.1fC " % (bmp280.temperature-10)
     pres = "Barometer: %0.1fhPa " % bmp280.pressure
     #alti = "Altitute: %0.2fm " % bmp280.altitude
     data = temp + pres
@@ -131,19 +131,22 @@ def annotate(filename, weather):
     draw = ImageDraw.Draw(txt)
     pos_x = base.height - 30
     date = datetime.datetime.now().strftime("%B %d, %Y %I:%M%p")
-    draw.text((10, pos_x), "Hydrocut Status (" + date + "): " + weather, font=font,fill=(255,255,255,128))
+    draw.text((10, pos_x), "Hydrocut Status (" + date + "): " + weather + "(Internet by @WorldlineCanada)", font=font,fill=(255,255,255,128))
     out = Image.alpha_composite(base, txt)
 
     logging.info("Saving image with weather data")
     out.convert('RGB').save(filename)
 
-def ftpfile(server, user, password, filename, remotefile):
+def ftpfile(server, user, password, filename, remotefile, archivedir):
     logging.info("Uploading file to " + server + " as " + remotefile)
     try:
         now = datetime.datetime.now()
         path = PosixPath(remotefile)
-        directory = now.strftime("%Y%U")
-        archivefilename = directory + "/" + path.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + path.suffix
+        directory = now.strftime("%Y%m")
+        directory2 = now.strftime("%Y%m/%d")
+        logging.debug("Remote file: " + remotefile)
+        logging.debug("Archive: " + archivedir)
+        archivefilename = archivedir + "/"+ directory2 + "/" + path.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + path.suffix
         session = ftplib.FTP(server,user,password)
         # make a new directory and don't complain if it's already there
         logging.info("Storing old image in " + directory + " as " + archivefilename)
@@ -151,6 +154,10 @@ def ftpfile(server, user, password, filename, remotefile):
             session.mkd(directory)
         except:
             logging.warn("Error creating directory (ignored)")
+        try:
+            session.mkd(directory2)
+        except:
+            logging.warn("Error creating directory2 (ignored)")
         try:
             logging.debug("Renaming " + remotefile + " to " + archivefilename)
             session.rename(remotefile, archivefilename)
@@ -174,7 +181,7 @@ def twitterpost(filename, twitter, weather):
         #Using our newly created object, utilize the update_status to send in the text passed in through CMD
         photo = open(filename,'rb')                  # file to send
         response = api.upload_media(media=photo)
-        api.update_status(status='Hydrocut Status: ' + weather, media_ids=[response['media_id']])
+        api.update_status(status='Hydrocut Status: ' + weather + "(Internet by @WorldlineCanada)", media_ids=[response['media_id']])
         photo.close()                                    # close file and FTP
     except:
         logging.error('Failed to Tweet the status')
@@ -242,7 +249,7 @@ if (twitterEnabled):
 annotate(config['image']['filename'], weather)
 
 if (ftpEnabled):
-    ftpfile(config['ftp']['server'], config['ftp']['user'], config['ftp']['password'], config['image']['filename'], config['ftp']['remotefile'])
+    ftpfile(config['ftp']['server'], config['ftp']['user'], config['ftp']['password'], config['image']['filename'], config['ftp']['remotefile'], config['ftp']['archive'])
 
 
 

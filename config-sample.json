@@ -24,7 +24,8 @@
         "server" : "servername",
         "user" : "webcam",
         "password" : "password",
-        "remotefile": "webcam.jpg"
+        "remotefile": "webcam/webcam.jpg",
+        "archive": "archive"
     },
     "twitter":
     {
