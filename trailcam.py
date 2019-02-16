@@ -144,6 +144,7 @@ def ftpfile(server, user, password, filename, remotefile, archivedir):
         path = PosixPath(remotefile)
         directory = now.strftime("%Y%m")
         directory2 = now.strftime("%Y%m/%d")
+        today = now.strftime("%d")
         logging.debug("Remote file: " + remotefile)
         logging.debug("Archive: " + archivedir)
         archivefilename = archivedir + "/"+ directory2 + "/" + path.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + path.suffix
@@ -151,13 +152,18 @@ def ftpfile(server, user, password, filename, remotefile, archivedir):
         # make a new directory and don't complain if it's already there
         logging.info("Storing old image in " + directory + " as " + archivefilename)
         try:
+            logging.debug("Making " + directory)
             session.mkd(directory)
         except:
             logging.warn("Error creating directory (ignored)")
+        pwd = session.pwd()
         try:
-            session.mkd(directory2)
+            logging.debug("Making " + directory2 + " in " + pwd + " as " + today)
+            session.cwd(directory)
+            session.mkd(today)
         except:
             logging.warn("Error creating directory2 (ignored)")
+        session.cwd(pwd)
         try:
             logging.debug("Renaming " + remotefile + " to " + archivefilename)
             session.rename(remotefile, archivefilename)
