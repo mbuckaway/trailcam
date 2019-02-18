@@ -137,34 +137,36 @@ def annotate(filename, weather):
     logging.info("Saving image with weather data")
     out.convert('RGB').save(filename)
 
+def ftpmkdir(session, directory):
+    path = PosixPath(directory)
+    parts = path.parts
+    length = len(parts)-1
+    i = 0
+    root = parts[0]
+    while (i < length)  :
+        search = parts[i+1]
+        newroot = PosixPath(root).joinpath(search).as_posix()
+        dirlist = session.nlst(root)
+        if search not in dirlist : #check if 'foo' exist inside 'www'
+            session.mkd(newroot) #Create a new directory called foo on the server.
+        i=i+1
+        root = newroot
+
 def ftpfile(server, user, password, filename, remotefile, archivedir):
     logging.info("Uploading file to " + server + " as " + remotefile)
     try:
         now = datetime.datetime.now()
-        path = PosixPath(remotefile)
-        directory = now.strftime("%Y%m")
-        directory2 = now.strftime("%Y%m/%d")
-        today = now.strftime("%d")
+        remotepath = PosixPath(remotefile)
+        archivepath = PosixPath(archivedir).joinpath(now.strftime("%Y%m/%d")).to_posix()
+        archivefilename =  PosixPath(archivepath).joinpath(remotepath.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + remotepath.suffix).to_posix()
         logging.debug("Remote file: " + remotefile)
-        logging.debug("Archive: " + archivedir)
-        archivefilename = archivedir + "/"+ directory2 + "/" + path.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + path.suffix
+        logging.debug("Archive path: " + archivepath)
+        logging.debug("Archive file: " + archivefilename)
         session = ftplib.FTP(server,user,password)
         # make a new directory and don't complain if it's already there
-        logging.info("Storing old image in " + directory + " as " + archivefilename)
+        logging.info("Storing old image in " + archivefilename)
         try:
-            logging.debug("Making " + directory)
-            session.mkd(directory)
-        except:
-            logging.warn("Error creating directory (ignored)")
-        pwd = session.pwd()
-        try:
-            logging.debug("Making " + directory2 + " in " + pwd + " as " + today)
-            session.cwd(directory)
-            session.mkd(today)
-        except:
-            logging.warn("Error creating directory2 (ignored)")
-        session.cwd(pwd)
-        try:
+            ftpmkdir(session, archivepath)
             logging.debug("Renaming " + remotefile + " to " + archivefilename)
             session.rename(remotefile, archivefilename)
         except:
