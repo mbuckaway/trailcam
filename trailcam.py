@@ -157,8 +157,8 @@ def ftpfile(server, user, password, filename, remotefile, archivedir):
     try:
         now = datetime.datetime.now()
         remotepath = PosixPath(remotefile)
-        archivepath = PosixPath(archivedir).joinpath(now.strftime("%Y%m/%d")).to_posix()
-        archivefilename =  PosixPath(archivepath).joinpath(remotepath.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + remotepath.suffix).to_posix()
+        archivepath = PosixPath(archivedir).joinpath(now.strftime("%Y%m/%d")).as_posix()
+        archivefilename =  PosixPath(archivepath).joinpath(remotepath.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + remotepath.suffix).as_posix()
         logging.debug("Remote file: " + remotefile)
         logging.debug("Archive path: " + archivepath)
         logging.debug("Archive file: " + archivefilename)
@@ -178,8 +178,10 @@ def ftpfile(server, user, password, filename, remotefile, archivedir):
         session.quit()
         session.close()
         logging.info("Upload completed successfully.")
+    except NameError:
+        logging.error('Failed to FTP file: NameError in script')
     except:
-        logging.error('Failed to FTP file')
+        logging.error('Failed to FTP file: ')
 
 def twitterpost(filename, twitter, weather):
     logging.info("Posting to twitter...")
