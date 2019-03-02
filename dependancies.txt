@@ -1,0 +1,11 @@
+Pillow: https://github.com/python-pillow/Pillow
+Adafruit_CircuitPython_BMP280: https://github.com/adafruit/Adafruit_CircuitPython_BMP280
+adafruit-circuitpython-mpl3115a2
+ephem
+logging_configurator
+picamera
+python-daemon
+
+Linux:
+libopenjp2-7
+libtiff5

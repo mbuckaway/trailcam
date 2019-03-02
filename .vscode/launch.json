@@ -16,7 +16,7 @@
             "type": "python",
             "request": "attach",
             "port": 5678,
-            "host": "localhost",
+            "host": "192.168.30.16",
             "pathMappings": [
                 {
                     "localRoot": "${workspaceFolder}",

@@ -9,7 +9,8 @@
     },
     "sensor":
     {
-        "enabled": false,
+        "enabled": true,
+        "type": "mp3115a2",
         "sea_level_pressure": 1029.00,
         "address": 118
     },
@@ -25,7 +26,7 @@
         "user" : "webcam",
         "password" : "password",
         "remotefile": "webcam/webcam.jpg",
-        "archive": "archive"
+        "archive_dir": "archive"
     },
     "twitter":
     {
