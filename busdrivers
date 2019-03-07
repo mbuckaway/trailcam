@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# Script to enable i2c bus drive modules. It assumes the drivers are loaded in /etc/modules and present in /proc/modules
+#
+# BMP280 on id 0x76
+# MPL3115 on id 060
+if [ $UID != 0 ]
+then
+	echo "Must be run as root"
+	exit
+fi
+
+BUS="/sys/bus/i2c/devices/i2c-1"
+BMP280ID="0x76"
+MP3115ID="0x60"
+
+clean()
+{
+	echo "Removing i2c drivers..."
+	echo $BMP280ID > $BUS/delete_device
+	echo $MP3115ID > $BUS/delete_device
+}
+
+install()
+{
+	if grep bmp280_i2c /proc/modules > /dev/null
+	then
+		echo "BMP280 device enabled at $BMP280ID"
+		echo "bmp280 $BMP280ID" > $BUS/new_device
+	fi
+	if grep mpl3115 /proc/modules > /dev/null
+	then
+		echo "MP3115A2 device enabled at $MP3115ID"
+		echo "mpl3115 $MP3115ID" > $BUS/new_device
+	fi
+}
+
+if [ "$1" == "clean" ]
+then
+	clean
+else
+	install
+fi
+

@@ -1,0 +1,43 @@
+{
+    "camera": {
+        "type": "pi",
+        "device": "/dev/video0",
+        "delay": 2,
+        "latitude": "43.4873066",
+        "longitude": "-80.4841633",
+        "elevation": 400
+    },
+    "temperature":
+    {
+        "enabled": true,
+        "type": "bmp280",
+        "sea_level_pressure": 1029.00,
+        "device": "1-0076",
+        "rounding": 1
+    },
+    "image":
+    {
+        "width" : 1440,
+        "height" : 810,
+        "filename": "/home/user/webcam.jpg"
+    },
+    "ftp": {
+        "enabled": true,
+        "server" : "servername",
+        "user" : "webcam",
+        "password" : "password",
+        "remotefile": "webcam/webcam.jpg",
+        "archive_dir": "archive"
+    },
+    "twitter":
+    {
+        "enabled": false,
+        "ConsumerKey": "CONSUMER KEY",
+        "ConsumerSecret": "CONSUMER SECRET",
+        "AccessKey" : "ACCESS KEY",
+        "AccessSecret": "ACCESS SECRET"
+    },
+    "timestamp": {
+        "filename": "/home/user/timestamp.json"
+    }
+}
