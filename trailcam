@@ -4,11 +4,7 @@ import v4l2capture
 import sys
 import datetime
 import time
-import board
-import busio
 # Should figure out how to optionally load these based on config
-import adafruit_bmp280
-import adafruit_mpl3115a2
 import ftplib
 import argparse
 import json
@@ -21,7 +17,8 @@ from picamera import PiCamera
 from PIL import Image, ImageFont, ImageDraw
 import select
 from twython import Twython
-import Config
+from Config import ConfigError, Config, ConfigTemperature
+from TemperatureSensor import TemperatureSensor
 
 configure_logging()
 
@@ -49,18 +46,9 @@ def isdaytime(lat, logi, elevation):
     return result
 
 def tempdata(sensorconfig):
-    # Create library object using our Bus I2C port
-    i2c = busio.I2C(board.SCL, board.SDA)
-    # we support two sensors for temp/pressure: bmp280 and mpl3115a2
-    if (sensorconfig.sensortype == 'BMP280'):
-        sensor = adafruit_bmp280.Adafruit_BMP280_I2C(i2c, address=sensorconfig.address)
-    else:
-        sensor = adafruit_mpl3115a2.MPL3115A2(i2c, address=sensorconfig.address)
-
-    # change this to match the location's pressure (hPa) at sea level
-    sensor.sea_level_pressure = sensorconfig.sea_level_pressure
+    sensor = TemperatureSensor(sensorconfig)
     logging.debug("Getting temperature...")
-    temp = "Temp: %0.1fC " % (sensor.temperature-10)
+    temp = "Temp: %0.1fC " % (sensor.temperature)
     pres = "Barometer: %0.1fhPa " % sensor.pressure
     #alti = "Altitute: %0.2fm " % bmp280.altitude
     data = temp + pres
@@ -228,14 +216,14 @@ if (args.twitter == False):
     logging.warn("Twitter Disabled!")
     twitterEnabled = False
 
-sensorEnabled = config.sensor.enabled
+sensorEnabled = config.temperature.enabled
 if (args.sensor == False):
     logging.warn("Sensor Disabled!")
     sensorEnabled = False
 
 logging.debug("Camera device: " + config.camera.device)
-logging.debug("Sensor Type: " + config.sensor.sensortype)
-logging.debug("Sensor Address: " + format(config.sensor.address, '#04x'))
+logging.debug("Sensor Type: " + config.temperature.sensortype)
+logging.debug("Sensor Device: " + config.temperature.device)
 logging.debug("Image size: " + str(config.image.width) + "x" + str(config.image.height))
 logging.debug("Image file: " + config.image.filename)
 logging.debug("Ftp Server: " + config.ftp.server)
@@ -243,26 +231,26 @@ logging.debug("Ftp User: " + config.ftp.user)
 
 # Load the temperature data
 if (sensorEnabled == True):
-    weather = tempdata(config.sensor)
+    weather = tempdata(config.temperature)
 else:
     weather = ''
 
-if (config['camera']['type'] == 'pi'):
+if (config.camera.cameratype == 'pi'):
     logging.debug("Using PI camera")
-    isdaytime = isdaytime(config['camera']['latitude'], config['camera']['longitude'], config['camera']['elevation'])
+    isdaytime = isdaytime(config.camera.latitude, config.camera.longitude, config.camera.elevation)
     logging.info("System is in day mode: " + str(isdaytime))
     snapshotPiCamera(isdaytime, config.camera)
 else:    
     logging.debug("Using USB camera")
-    snapshotv4l(config.camera)
+    snapshotv4l(config.camera, config.image)
 
 if (twitterEnabled):
-    twitterpost(config['image']['filename'], config['twitter'], weather)
+    twitterpost(config.image.filename, config.twitter, weather)
 
-annotate(config['image']['filename'], weather)
+annotate(config.image.filename, weather)
 
 if (ftpEnabled):
-    ftpfile(config['ftp']['server'], config['ftp']['user'], config['ftp']['password'], config['image']['filename'], config['ftp']['remotefile'], config['ftp']['archive'])
+    ftpfile(config.ftp, config.image)
 
 
 

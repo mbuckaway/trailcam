@@ -7,12 +7,13 @@
         "longitude": "-80.4841633",
         "elevation": 400
     },
-    "sensor":
+    "temperature":
     {
         "enabled": true,
-        "type": "mp3115a2",
+        "type": "bmp280",
         "sea_level_pressure": 1029.00,
-        "address": 118
+        "device": "1-0076",
+        "rounding": 1
     },
     "image":
     {

@@ -44,7 +44,7 @@ class ConfigCamera:
     def elevation(self):
         return self.property_elevation
 
-class ConfigSensor:
+class ConfigTemperature:
     """ Sensor section configuration """
 
     def __init__(self, object):
@@ -52,7 +52,12 @@ class ConfigSensor:
             self.property_enabled = object['enabled']
             self.property_type = object['type']
             self.property_sealevelpressure = object['sea_level_pressure']
-            self.property_address = object['address']
+            self.property_device = object['device']
+            # Rounding is optional. -1 means no rounding
+            try:
+                self.property_rounding = int(object['rounding'])
+            except KeyError:
+                self.property_rounding = -1
         except KeyError as e:
             raise ConfigError("Sensor Section: " + str(e.args))
 
@@ -70,8 +75,12 @@ class ConfigSensor:
         return self.property_sealevelpressure
 
     @property
-    def address(self):
-        return self.property_address
+    def device(self):
+        return self.property_device
+
+    @property
+    def rounding(self):
+        return self.property_rounding
 
 
 class ConfigImage:
@@ -182,7 +191,7 @@ class Config:
     -80.4841633
     >>> print(configFile.camera.elevation)
     400
-    >>> print(configFile.sensor.enabled)
+    >>> print(configFile.temperature.enabled)
     True
     >>> print(configFile.image.width)
     1440
@@ -203,7 +212,7 @@ class Config:
         # Load the sections of the config
         try:
             self.property_camera = ConfigCamera(self.config['camera'])
-            self.property_sensor = ConfigSensor(self.config['sensor'])
+            self.property_temperature = ConfigTemperature(self.config['temperature'])
             self.property_image = ConfigImage(self.config['image'])
             self.property_ftp = ConfigFTP(self.config['ftp'])
             self.property_twitter = ConfigTwitter(self.config['twitter'])
@@ -222,8 +231,8 @@ class Config:
         return self.property_camera
 
     @property
-    def sensor(self):
-        return self.property_sensor
+    def temperature(self):
+        return self.property_temperature
 
     @property
     def image(self):

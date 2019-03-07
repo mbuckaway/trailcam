@@ -4,8 +4,8 @@ from pathlib import PosixPath
 from abc import ABC, abstractproperty
 
 class DeviceError(RuntimeError):
-   def __init__(self, device):
-      self.device = device
+   def __init__(self, devicePath):
+      self.device = str(devicePath)
 
 class AbstractTemperatureSensor(ABC):
     """ Base class for the temperature sensor """
@@ -102,28 +102,38 @@ class MP3115Sensor(AbstractTemperatureSensor):
         super().__init__(temperature_config)
         self.property_bus = "i2c"
         devicepath = PosixPath("/sys/bus/i2c/devices").joinpath(temperature_config.device).joinpath("iio:device0")
-        self.temperature_path = PosixPath(devicepath.joinpath("in_temp_input"))
-        self.pressure_path = PosixPath(devicepath.joinpath("in_pressure_input"))
+        self.temperature_path_raw = PosixPath(devicepath.joinpath("in_temp_raw"))
+        self.temperature_path_scale = PosixPath(devicepath.joinpath("in_temp_scale"))
+        self.pressure_path_raw = PosixPath(devicepath.joinpath("in_pressure_raw"))
+        self.pressure_path_scale = PosixPath(devicepath.joinpath("in_pressure_scale"))
         # Make sure they exist
-        if (not self.temperature_path.exists() and not self.temperature_path.is_file()):
-            raise DeviceError(self.temperature_path)
-        if (not self.pressure_path.exists() and not self.pressure_path.is_file()):
-            raise DeviceError(self.pressure_path)
+        if (not self.temperature_path_raw.exists() and not self.temperature_path_raw.is_file()):
+            raise DeviceError(self.temperature_path_raw)
+        if (not self.temperature_path_scale.exists() and not self.temperature_path_scale.is_file()):
+            raise DeviceError(self.temperature_path_scale)
+        if (not self.pressure_path_raw.exists() and not self.pressure_path_raw.is_file()):
+            raise DeviceError(self.pressure_path_raw)
+        if (not self.pressure_path_scale.exists() and not self.pressure_path_scale.is_file()):
+            raise DeviceError(self.pressure_path_scale)
 
     @property
     def temperature(self):
-        with self.temperature_path.open() as f:
-            data = f.readline()
-        result = int(data)/1000
+        with self.temperature_path_raw.open() as f:
+            data_raw = f.readline()
+        with self.temperature_path_scale.open() as f:
+            data_scale = f.readline()
+        result = int(data_raw)*float(data_scale)
         if (self.property_sensor_config.rounding != -1):
             result = round(result, self.property_sensor_config.rounding)
         return result
 
     @property
     def pressure(self):
-        with self.pressure_path.open() as f:
-            data = f.readline()
-        result = int(data) * 10
+        with self.pressure_path_raw.open() as f:
+            data_raw = f.readline()
+        with self.pressure_path_scale.open() as f:
+            data_scale = f.readline()
+        result = int(data_raw) * float(data_scale) * 10
         if (self.property_sensor_config.rounding != -1):
             result = round(result, self.property_sensor_config.rounding)
         return result
@@ -192,6 +202,12 @@ class TemperatureSensor:
     980
     >>> print(str(sensor.temperature))
     20
+    >>> configFile = Config('config-test-mp3115a2.json')
+    >>> sensor = TemperatureSensor(configFile.temperature)
+    >>> print(str(sensor.pressure))
+    980
+    >>> print(str(sensor.temperature))
+    20
     """
     def __init__(self, temperature_config):
         try:
@@ -204,7 +220,7 @@ class TemperatureSensor:
             else:
                 raise ConfigError("Invalid temperature sensor type: " + temperature_config.sensortype)
         except DeviceError as e:
-            logging.error("Unable to find sensor: " + e.args)
+            logging.error("Unable to find sensor: " + str(e.args))
 
     @property
     def temperature(self):

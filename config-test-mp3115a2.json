@@ -10,7 +10,7 @@
     "temperature":
     {
         "enabled": true,
-        "type": "mp3115",
+        "type": "MP3115A2",
         "sea_level_pressure": 1029.00,
         "device": "1-0060",
         "rounding": 1
