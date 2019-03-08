@@ -15,6 +15,13 @@
         "device": "1-0076",
         "rounding": 1
     },
+    "lightsensor":
+    {
+        "enabled": true,
+        "type": "bh1750",
+        "device": "1-0023",
+        "rounding": 1
+    },
     "image":
     {
         "width" : 1440,

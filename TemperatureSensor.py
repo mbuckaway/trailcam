@@ -1,11 +1,8 @@
-from Config import ConfigError, Config, ConfigTemperature
+from Config import Config, ConfigTemperature
 import logging
 from pathlib import PosixPath
 from abc import ABC, abstractproperty
-
-class DeviceError(RuntimeError):
-   def __init__(self, devicePath):
-      self.device = str(devicePath)
+from Exceptions import DeviceError, ConfigError
 
 class AbstractTemperatureSensor(ABC):
     """ Base class for the temperature sensor """

@@ -1,6 +1,6 @@
 {
     "camera": {
-        "type": "pi",
+        "type": "v2l",
         "device": "/dev/video0",
         "delay": 2,
         "latitude": "43.4873066",
@@ -10,18 +10,27 @@
     "temperature":
     {
         "enabled": true,
-        "type": "ds18b20",
-        "device": "28-0113140e56aa",
+        "type": "MP3115A2",
+        "sea_level_pressure": 1029.00,
+        "device": "1-0060",
+        "rounding": 1
+    },
+    "lightsensor":
+    {
+        "enabled": true,
+        "type": "bh1750",
+        "device": "1-0023",
         "rounding": 1
     },
     "image":
     {
         "width" : 1440,
         "height" : 810,
-        "filename": "/home/user/webcam.jpg"
+        "filename": "/tmp/webcam.jpg",
+        "archive": "/tmp/archive"
     },
     "ftp": {
-        "enabled": true,
+        "enabled": false,
         "server" : "servername",
         "user" : "webcam",
         "password" : "password",

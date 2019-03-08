@@ -1,10 +1,7 @@
 import json
 import logging
 import distutils.util
-
-class ConfigError(RuntimeError):
-   def __init__(self, section):
-      self.section = section
+from Exceptions import ConfigError
 
 class ConfigCamera:
     """ Camera section configuration """
@@ -51,7 +48,6 @@ class ConfigTemperature:
         try:
             self.property_enabled = object['enabled']
             self.property_type = object['type']
-            self.property_sealevelpressure = object['sea_level_pressure']
             self.property_device = object['device']
             # Rounding is optional. -1 means no rounding
             try:
@@ -71,8 +67,37 @@ class ConfigTemperature:
         return self.property_enabled
 
     @property
-    def sea_level_pressure(self):
-        return self.property_sealevelpressure
+    def device(self):
+        return self.property_device
+
+    @property
+    def rounding(self):
+        return self.property_rounding
+
+class ConfigLightSensor:
+    """ Light Sensor section configuration """
+
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_type = object['type']
+            self.property_device = object['device']
+            # Rounding is optional. -1 means no rounding
+            try:
+                self.property_rounding = int(object['rounding'])
+            except KeyError:
+                self.property_rounding = -1
+        except KeyError as e:
+            raise ConfigError("Light Sensor Section: " + str(e.args))
+
+    @property
+    def sensortype(self):
+        """ Sensor types are bh1750 only at this point """
+        return self.property_type.upper()
+
+    @property
+    def enabled(self):
+        return self.property_enabled
 
     @property
     def device(self):
@@ -81,7 +106,6 @@ class ConfigTemperature:
     @property
     def rounding(self):
         return self.property_rounding
-
 
 class ConfigImage:
     """ Image config section """
@@ -105,12 +129,51 @@ class ConfigImage:
     def filename(self):
         return self.property_filename
 
-
-class ConfigFTP:
-    """ FTP config section """
+class ConfigAnnotate:
+    """ Annotate config section """
     def __init__(self, object):
         try:
             self.property_enabled = object['enabled']
+            self.property_font = object['font']
+            self.property_format = object['format']
+            self.property_format_twitter = object['format_twitter']
+            self.property_size = int(object['size'])
+            self.property_position = object['position']
+        except KeyError as e:
+            raise ConfigError("Annotate Section: " + str(e.args))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def font(self):
+        return self.property_font
+
+    @property
+    def format(self):
+        return self.property_format
+
+    @property
+    def format_twitter(self):
+        return self.property_format_twitter
+
+    @property
+    def size(self):
+        return self.property_size
+
+    @property
+    def position(self):
+        return self.property_position
+
+class ConfigFTP:
+    """ FTP config section """
+    def __init__(self, object, enabled):
+        try:
+            self.property_enabled = object['enabled']
+            if (enabled == False):
+                logging.warn("FTP Disabled!")
+                self.property_enabled = False
             self.property_server = object['server']
             self.property_user = object['user']
             self.property_password = object['password']
@@ -145,9 +208,12 @@ class ConfigFTP:
 
 class ConfigTwitter:
     """ Twitter config section """
-    def __init__(self, object):
+    def __init__(self, object, enabled):
         try:
             self.property_enabled = object['enabled']
+            if (enabled == False):
+                logging.warn("Twitter Disabled!")
+                self.property_enabled = False
             self.property_consumerkey = object['ConsumerKey']
             self.property_consumersecret = object['ConsumerSecret']
             self.property_accesskey = object['AccessKey']
@@ -178,7 +244,9 @@ class ConfigTwitter:
 class Config:
     """ A class to deal with loading and parsing the config file and all the options within
 
-    >>> configFile = Config('config-sample.json')
+    >>> args.ftp = True
+    >>> args.twitter = True
+    >>> configFile = Config('config-sample.json', args)
     >>> print(configFile.camera.cameratype)
     pi
     >>> print(configFile.camera.device)
@@ -193,6 +261,8 @@ class Config:
     400
     >>> print(configFile.temperature.enabled)
     True
+    >>> print(configFile.lightsensor.enabled)
+    True
     >>> print(configFile.image.width)
     1440
     >>> print(configFile.image.height)
@@ -205,7 +275,7 @@ class Config:
     CONSUMER SECRET
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, args):
         self.filename = filename
         with open(filename) as json_data:
             self.config = json.load(json_data)
@@ -213,9 +283,19 @@ class Config:
         try:
             self.property_camera = ConfigCamera(self.config['camera'])
             self.property_temperature = ConfigTemperature(self.config['temperature'])
+            self.property_lightsensor = ConfigLightSensor(self.config['lightsensor'])
             self.property_image = ConfigImage(self.config['image'])
-            self.property_ftp = ConfigFTP(self.config['ftp'])
-            self.property_twitter = ConfigTwitter(self.config['twitter'])
+            self.property_ftp = ConfigFTP(self.config['ftp'], args.ftp)
+            self.property_twitter = ConfigTwitter(self.config['twitter'], args.twitter)
+            self.property_annotate = ConfigAnnotate(self.config['annotate'])
+            logging.debug("Camera device: " + self.property_camera.device)
+            logging.debug("Sensor Type: " + self.property_temperature.sensortype)
+            logging.debug("Sensor Device: " + self.property_temperature.device)
+            logging.debug("Image size: " + str(self.property_image.width) + "x" + str(self.property_image.height))
+            logging.debug("Image file: " + self.property_image.filename)
+            logging.debug("Ftp Server: " + self.property_ftp.server)
+            logging.debug("Ftp User: " + self.property_ftp.user)
+
         except KeyError as e:
             logging.error("Invalid or missing key in section config: " + str(e.args))
         except ConfigError as e:
@@ -235,8 +315,16 @@ class Config:
         return self.property_temperature
 
     @property
+    def lightsensor(self):
+        return self.property_lightsensor
+
+    @property
     def image(self):
         return self.property_image
+
+    @property
+    def annotate(self):
+        return self.property_annotate
 
     @property
     def ftp(self):
