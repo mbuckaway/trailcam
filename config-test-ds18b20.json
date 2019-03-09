@@ -14,6 +14,22 @@
         "device": "28-0113140e56aa",
         "rounding": 1
     },
+    "lightsensor":
+    {
+        "enabled": true,
+        "type": "bh1750",
+        "device": "1-0023",
+        "rounding": 1
+    },
+    "led":
+    {
+        "enabled": true,
+        "gpiopin": 17,
+        "fasttime": 0.2,
+        "fastcount": 5,
+        "slowcount": 5,
+        "slowtime": 0.5
+    },
     "image":
     {
         "width" : 1440,

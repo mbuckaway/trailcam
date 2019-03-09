@@ -1,8 +1,8 @@
-from Config import ConfigError, Config, ConfigTemperature
+from Config import Config, ConfigTemperature
 import logging
 from pathlib import PosixPath
 from abc import ABC, abstractproperty
-from Exceptions import DeviceError
+from Exceptions import DeviceError, ConfigError
 
 class AbstractLightSensor(ABC):
     """ Base class for the light sensor """
@@ -94,5 +94,5 @@ class LightSensor:
         return self.sensor.bus
 
 if __name__ == '__main__':
-  import doctest
-  doctest.testmod()
+    import doctest
+    doctest.testmod()

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import v4l2capture
 import sys
 import datetime
 import time
@@ -8,96 +7,16 @@ import time
 import ftplib
 import argparse
 import json
-import logging
-import ephem
-import math
-from PIL import Image, ImageFont, ImageDraw
 from pathlib import PosixPath
+import logging
 from logging_configurator import configure_logging
-from picamera import PiCamera
-import select
 from twython import Twython
 from Exceptions import ConfigError, DeviceError
 from Config import Config, ConfigTemperature, ConfigAnnotate
 from TemperatureSensor import TemperatureSensor
 from LightSensor import LightSensor
 from Annotate import Annotate
-
-configure_logging()
-
-def isdaytime(lat, logi, elevation):
-    sun = ephem.Sun()
-    observer = ephem.Observer()
-    #  Define your coordinates here
-    observer.lat, observer.lon, observer.elevation = lat, logi, elevation
-    # Set the time (UTC) here
-    observer.date = datetime.datetime.utcnow()
-    sun.compute(observer)
-    current_sun_alt = sun.alt*180/math.pi
-    result = True
-    # If the sun is -6 or greater, we are nightime
-    if (current_sun_alt<-6):
-        result = False
-    return result
-
-def snapshotPiCamera(isdaytime, cameraconfig):
-    with PiCamera() as camera:
-        camera.resolution = (cameraconfig.width, cameraconfig.height)
-        camera.awb_mode = 'auto'
-        camera.rotation = 180
-        camera.exif_tags['IFD0.Copyright'] = 'Copyright (c) 2019 Waterloo Cycling Club'
-        camera.exif_tags['EXIF.UserComment'] = "Hydrocut Web Cam"
-        # Get the time and see if we should be using night mode
-        if isdaytime:
-            #camera.exposure_mode = 'beach'
-            camera.iso = 100
-        else:
-            #camera.exposure_mode = 'nightpreview'
-            camera.iso = 1200
-            camera.brightness = 60
-        try:
-            time.sleep(2)
-            camera.capture(cameraconfig.filename, format='jpeg', use_video_port=False)
-            time.sleep(1)
-            camera.capture(cameraconfig.filename, format='jpeg', use_video_port=False)
-        except:
-            logging.error("Camera was unable to capture an image")
-
-def snapshotv4l(cameraconfig, imageconfig):
-    logging.info("Taking photo from device: " + cameraconfig.device)
-    # Open the video device.
-    video = v4l2capture.Video_device(cameraconfig.device)
-
-    # Suggest an image size to the device. The device may choose and
-    # return another size if it doesn't support the suggested one.
-    size_x, size_y = video.set_format(imageconfig.width, imageconfig.height)
-
-    # Create a buffer to store image data in. This must be done before
-    # calling 'start' if v4l2capture is compiled with libv4l2. Otherwise
-    # raises IOError.
-    video.create_buffers(1)
-
-    # Start the device. This lights the LED if it's a camera that has one.
-    #print("Exposure: " + str(video.get_exposure_absolute()))
-    video.start()
-
-    # Wait a little. Some cameras take a few seconds to get bright enough.
-    if (cameraconfig.delay>0):
-        time.sleep(cameraconfig.delay)
-
-    # Send the buffer to the device.
-    video.queue_all_buffers()
-
-    # Wait for the device to fill the buffer.
-    select.select((video,), (), ())
-
-    # The rest is easy :-)
-    image_data = video.read()
-    video.stop()
-    video.close()
-    image = Image.frombytes("RGB", (size_x, size_y), image_data)
-    logging.info("Saving file: " + imageconfig.filename)
-    image.save(imageconfig.filename)
+from Camera import Camera
 
 def ftpmkdir(session, directory):
     path = PosixPath(directory)
@@ -177,19 +96,13 @@ def main():
         configure_logging(args.logfile, 'DEBUG', True, True)
 
     logging.debug('Loading config: ' + args.config)
-    config = Config(args.config, args)
+    config = Config(args.config, args.ftp, args.twitter)
 
     annotate = Annotate(config.annotate, config.image, config.temperature, config.lightsensor)
     annotate.ReadSensors()
 
-    if (config.camera.cameratype == 'pi'):
-        logging.debug("Using PI camera")
-        isdaytime = isdaytime(config.camera.latitude, config.camera.longitude, config.camera.elevation)
-        logging.info("System is in day mode: " + str(isdaytime))
-        snapshotPiCamera(isdaytime, config.camera)
-    else:    
-        logging.debug("Using USB camera")
-        snapshotv4l(config.camera, config.image)
+    camera = Camera(config.camera, config.image, config.led, annotate.light_level)
+    camera.SnapPhoto()
 
     annotate.UpdateImage()
 
@@ -198,6 +111,7 @@ def main():
 
 if __name__ == '__main__':
     try:
+        configure_logging()
         main()
     except Exception as e:
         logging.error("Unhandled exception caught: " + str(e.args))

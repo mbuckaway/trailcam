@@ -5,7 +5,8 @@
         "delay": 2,
         "latitude": "43.4873066",
         "longitude": "-80.4841633",
-        "elevation": 400
+        "elevation": 400,
+        "rotation": 180
     },
     "temperature":
     {
@@ -22,12 +23,30 @@
         "device": "1-0023",
         "rounding": 1
     },
+    "led":
+    {
+        "enabled": true,
+        "gpiopin": 17,
+        "fasttime": 0.2,
+        "fastcount": 5,
+        "slowcount": 5,
+        "slowtime": 0.5
+    },
     "image":
     {
         "width" : 1440,
         "height" : 810,
         "filename": "/tmp/webcam.jpg",
         "archive": "/tmp/archive"
+    },
+    "annotate":
+    {
+        "enabled": true,
+        "font": "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+        "size": 18,
+        "format": "Hydrocut Status (%%DATE%%): %%TEMP%%C %%LIGHT%%Lux (Internet by @WorldlineCanada)",
+        "format_twitter": "Hydrocut Status: %%TEMP%%C %%LIGHT%%Lux (Internet by @WorldlineCanada)",
+        "position": "bottom"
     },
     "ftp": {
         "enabled": false,

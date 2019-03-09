@@ -14,6 +14,7 @@ class ConfigCamera:
             self.property_latitude = object['latitude']
             self.property_longitude = object["longitude"]
             self.property_elevation = object["elevation"]
+            self.property_rotation = object['rotation']
         except KeyError as e:
             raise ConfigError("Camera Section: " + str(e.args))
 
@@ -40,6 +41,10 @@ class ConfigCamera:
     @property
     def elevation(self):
         return self.property_elevation
+    
+    @property
+    def rotation(self):
+        return self.property_rotation
 
 class ConfigTemperature:
     """ Sensor section configuration """
@@ -166,6 +171,44 @@ class ConfigAnnotate:
     def position(self):
         return self.property_position
 
+class ConfigLED:
+    """ LED config section """
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_gpiopin = int(object['gpiopin'])
+            self.property_fasttime = object['fasttime']
+            self.property_fastcount = object['fastcount']
+            self.property_slowtime = object['slowtime']
+            self.property_slowcount = object['slowcount']
+        except KeyError as e:
+            raise ConfigError('LED Section: ' + str(e.args))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def gpiopin(self):
+        return self.property_gpiopin
+
+    @property
+    def fasttime(self):
+        return self.property_fasttime
+
+    @property
+    def fastcount(self):
+        return self.property_fastcount
+
+    @property
+    def slowtime(self):
+        return self.property_slowtime
+
+    @property
+    def slowcount(self):
+        return self.property_slowcount
+
+
 class ConfigFTP:
     """ FTP config section """
     def __init__(self, object, enabled):
@@ -244,9 +287,7 @@ class ConfigTwitter:
 class Config:
     """ A class to deal with loading and parsing the config file and all the options within
 
-    >>> args.ftp = True
-    >>> args.twitter = True
-    >>> configFile = Config('config-sample.json', args)
+    >>> configFile = Config('config-sample.json')
     >>> print(configFile.camera.cameratype)
     pi
     >>> print(configFile.camera.device)
@@ -275,7 +316,7 @@ class Config:
     CONSUMER SECRET
     """
 
-    def __init__(self, filename, args):
+    def __init__(self, filename, ftpenabled = False, twitterenabled = False):
         self.filename = filename
         with open(filename) as json_data:
             self.config = json.load(json_data)
@@ -285,9 +326,10 @@ class Config:
             self.property_temperature = ConfigTemperature(self.config['temperature'])
             self.property_lightsensor = ConfigLightSensor(self.config['lightsensor'])
             self.property_image = ConfigImage(self.config['image'])
-            self.property_ftp = ConfigFTP(self.config['ftp'], args.ftp)
-            self.property_twitter = ConfigTwitter(self.config['twitter'], args.twitter)
+            self.property_ftp = ConfigFTP(self.config['ftp'], ftpenabled)
+            self.property_twitter = ConfigTwitter(self.config['twitter'], twitterenabled)
             self.property_annotate = ConfigAnnotate(self.config['annotate'])
+            self.property_led = ConfigLED(self.config['led'])
             logging.debug("Camera device: " + self.property_camera.device)
             logging.debug("Sensor Type: " + self.property_temperature.sensortype)
             logging.debug("Sensor Device: " + self.property_temperature.device)
@@ -325,6 +367,10 @@ class Config:
     @property
     def annotate(self):
         return self.property_annotate
+
+    @property
+    def led(self):
+        return self.property_led
 
     @property
     def ftp(self):

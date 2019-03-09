@@ -10,4 +10,4 @@ Linux:
 libopenjp2-7
 libtiff5
 ttf-freefont
-
+python3-gpiozero
