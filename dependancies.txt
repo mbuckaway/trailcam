@@ -5,9 +5,12 @@ ephem
 logging_configurator
 picamera
 python-daemon
+twilio
+unittest
 
 Linux:
 libopenjp2-7
 libtiff5
 ttf-freefont
 python3-gpiozero
+python3-openpyxl

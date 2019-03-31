@@ -1,10 +1,10 @@
-from Config import Config, ConfigTemperature, ConfigLightSensor
+from webcamlib.Config import Config, ConfigTemperature, ConfigLightSensor
 import logging
 from pathlib import PosixPath
 from PIL import Image, ImageFont, ImageDraw
 import datetime
-from TemperatureSensor import TemperatureSensor
-from LightSensor import LightSensor
+from webcamlib.TemperatureSensor import TemperatureSensor
+from webcamlib.LightSensor import LightSensor
 
 class Annotate:
     def __init__(self, config_annotate, config_image, config_temperature, config_lightsensor):

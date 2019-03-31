@@ -1,8 +1,8 @@
-from Config import Config, ConfigTemperature
+from webcamlib.Config import Config, ConfigTemperature
 import logging
 from pathlib import PosixPath
 from abc import ABC, abstractproperty
-from Exceptions import DeviceError, ConfigError
+from webcamlib.Exceptions import DeviceError, ConfigError
 
 class AbstractTemperatureSensor(ABC):
     """ Base class for the temperature sensor """

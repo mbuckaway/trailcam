@@ -1,4 +1,4 @@
-from Config import Config
+from webcamlib.Config import Config
 import v4l2capture
 from PIL import Image
 from picamera import PiCamera

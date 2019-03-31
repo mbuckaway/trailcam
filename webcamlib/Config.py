@@ -1,7 +1,7 @@
 import json
 import logging
 import distutils.util
-from Exceptions import ConfigError
+from webcamlib.Exceptions import ConfigError
 
 class ConfigCamera:
     """ Camera section configuration """
@@ -112,6 +112,39 @@ class ConfigLightSensor:
     def rounding(self):
         return self.property_rounding
 
+class ConfigVoltageSensor:
+    """ Voltage/Current Sensor section configuration """
+
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_type = object['type']
+            self.property_address = object['address']
+            # Rounding is optional. -1 means no rounding
+            try:
+                self.property_rounding = int(object['rounding'])
+            except KeyError:
+                self.property_rounding = -1
+        except KeyError as e:
+            raise ConfigError("Voltage Sensor Section: " + str(e.args))
+
+    @property
+    def sensortype(self):
+        """ Sensor types are INA219 only at this point """
+        return self.property_type.upper()
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def address(self):
+        return self.property_address
+
+    @property
+    def rounding(self):
+        return self.property_rounding
+
 class ConfigImage:
     """ Image config section """
     def __init__(self, object):
@@ -215,7 +248,7 @@ class ConfigFTP:
         try:
             self.property_enabled = object['enabled']
             if (enabled == False):
-                logging.warn("FTP Disabled!")
+                logging.warning("FTP Disabled!")
                 self.property_enabled = False
             self.property_server = object['server']
             self.property_user = object['user']
@@ -255,7 +288,7 @@ class ConfigTwitter:
         try:
             self.property_enabled = object['enabled']
             if (enabled == False):
-                logging.warn("Twitter Disabled!")
+                logging.warning("Twitter Disabled!")
                 self.property_enabled = False
             self.property_consumerkey = object['ConsumerKey']
             self.property_consumersecret = object['ConsumerSecret']
@@ -285,35 +318,8 @@ class ConfigTwitter:
         return self.property_accesssecret
 
 class Config:
-    """ A class to deal with loading and parsing the config file and all the options within
-
-    >>> configFile = Config('config-sample.json')
-    >>> print(configFile.camera.cameratype)
-    pi
-    >>> print(configFile.camera.device)
-    /dev/video0
-    >>> print(configFile.camera.delay)
-    2
-    >>> print(configFile.camera.latitude)
-    43.4873066
-    >>> print(configFile.camera.longitude)
-    -80.4841633
-    >>> print(configFile.camera.elevation)
-    400
-    >>> print(configFile.temperature.enabled)
-    True
-    >>> print(configFile.lightsensor.enabled)
-    True
-    >>> print(configFile.image.width)
-    1440
-    >>> print(configFile.image.height)
-    810
-    >>> print(configFile.image.filename)
-    /home/user/webcam.jpg
-    >>> print(configFile.ftp.server)
-    servername
-    >>> print(configFile.twitter.consumersecret)
-    CONSUMER SECRET
+    """
+    A class to deal with loading and parsing the config file and all the options within
     """
 
     def __init__(self, filename, ftpenabled = False, twitterenabled = False):
@@ -325,6 +331,7 @@ class Config:
             self.property_camera = ConfigCamera(self.config['camera'])
             self.property_temperature = ConfigTemperature(self.config['temperature'])
             self.property_lightsensor = ConfigLightSensor(self.config['lightsensor'])
+            self.property_voltagesensor = ConfigVoltageSensor(self.config['voltagesensor'])
             self.property_image = ConfigImage(self.config['image'])
             self.property_ftp = ConfigFTP(self.config['ftp'], ftpenabled)
             self.property_twitter = ConfigTwitter(self.config['twitter'], twitterenabled)
@@ -343,6 +350,8 @@ class Config:
         except ConfigError as e:
             logging.error("Invalid or missing key in config: " + e.section)
 
+    def dispose(self):
+        pass
 
     @property
     def configfile(self):
@@ -359,6 +368,10 @@ class Config:
     @property
     def lightsensor(self):
         return self.property_lightsensor
+
+    @property
+    def voltagesensor(self):
+        return self.property_voltagesensor
 
     @property
     def image(self):
@@ -379,6 +392,7 @@ class Config:
     @property
     def twitter(self):
         return self.property_twitter
+
 
 if __name__ == '__main__':
   import doctest

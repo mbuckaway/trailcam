@@ -2,16 +2,16 @@
 import argparse
 import logging
 from logging_configurator import configure_logging
-from Exceptions import ConfigError, DeviceError
-from Config import Config
-from TemperatureSensor import TemperatureSensor
-from LightSensor import LightSensor
-from Annotate import Annotate
-from Camera import Camera
-from FtpFile import FtpFile
-from TwitterPost import TwitterPost
+from webcamlib.Exceptions import ConfigError, DeviceError
+from webcamlib.Config import Config
+from webcamlib.TemperatureSensor import TemperatureSensor
+from webcamlib.LightSensor import LightSensor
+from webcamlib.Annotate import Annotate
+from webcamlib.Camera import Camera
+from webcamlib.FtpFile import FtpFile
+from webcamlib.TwitterPost import TwitterPost
 
-def main():
+def main(prog_name):
     parser = argparse.ArgumentParser(description='Trail Webcam utility')
     parser.add_argument('-l', '--logfile', default='trailcam.log', help='logging filename')
     parser.add_argument('-L', '--loglevel', default='INFO', help='logging level (default INFO)')
@@ -40,14 +40,14 @@ def main():
 
     twitterpost = TwitterPost(config.image.filename, config.twitter, annotate.annotation_twitter)
     twitterpost.post()
-    
+
     ftpfile = FtpFile(config.ftp, config.image)
     ftpfile.sendfile()
 
 if __name__ == '__main__':
     try:
         configure_logging()
-        main()
+        main("cli_webcam")
     except Exception as e:
         logging.error("Unhandled exception caught: " + str(e.args))
 
