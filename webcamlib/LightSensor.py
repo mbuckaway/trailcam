@@ -17,6 +17,9 @@ class AbstractLightSensor(ABC):
     def bus(self):
         pass        
 
+    def dispose(self):
+        pass
+
 
 class BH1750Sensor(AbstractLightSensor):
     """
@@ -48,6 +51,9 @@ class BH1750Sensor(AbstractLightSensor):
         if (not self.lightsensor_path_scale.exists() and not self.lightsensor_path_scale.is_file()):
             raise DeviceError(self.lightsensor_path_scale)
 
+    def dispose(self):
+        pass
+
     @property
     def lightlevel(self):
         with self.lightsensor_path_raw.open() as f:
@@ -70,11 +76,6 @@ class LightSensor:
         ..additional chips may be added in the future
 
         Reading pressure from a sensor that does not support it will return 0
-
-    >>> configFile = Config('config-test-bh1750.json')
-    >>> sensor = LightSensor(configFile.lightsensor)
-    >>> print(str(sensor.lightlevel))
-    100
     """
     def __init__(self, lightsensor_config):
         try:
@@ -84,6 +85,9 @@ class LightSensor:
                 raise ConfigError("Invalid light level sensor type: " + lightsensor_config.sensortype)
         except DeviceError as e:
             logging.error("Unable to find sensor: " + str(e.args))
+
+    def dispose(self):
+        self.sensor.dispose()
 
     @property
     def lightlevel(self):

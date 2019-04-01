@@ -4,13 +4,6 @@ from twython import Twython
 class TwitterPost:
     """ 
     TwitterPost uploads the webcam image to twitter
-    
-    >>> from logging_configurator import configure_logging
-    >>> from Config import Config
-    >>> configure_logging()
-    >>> config = Config('config-twitter.json', False, True)
-    >>> twitter = TwitterPost(config.image.filename, config.twitter, 'This is a test')
-    >>> twitter.post()
     """
     def __init__(self, filename, twitterconfig, annotation):
         self.property_filename = filename

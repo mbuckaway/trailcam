@@ -6,13 +6,6 @@ import datetime
 class FtpFile:
     """ 
     Ftp File uploads the webcam image to the remote directory, after archiving the old image
-    
-    >>> from logging_configurator import configure_logging
-    >>> from Config import Config
-    >>> configure_logging()
-    >>> configFile = Config('config.json', True, False)
-    >>> ftpfile = FtpFile(configFile.ftp, configFile.image)
-    >>> ftpfile.sendfile()
     """
     def __init__(self, ftpconfig, imageconfig):
         self.property_ftpconfig = ftpconfig
@@ -32,6 +25,9 @@ class FtpFile:
                 self.session.mkd(newroot) #Create a new directory called foo on the server.
             i=i+1
             root = newroot
+
+    def dispose(self):
+        pass
 
     def sendfile(self):
         if (self.property_ftpconfig.enabled):

@@ -14,12 +14,6 @@ import time
 class Camera:
     """
     Class to represent the supported cameras, flash the led if enabled, and take a photo
-    >>> from logging_configurator import configure_logging
-    >>> configure_logging()
-    >>> configFile = Config('config-sample.json')
-    >>> camera = Camera(configFile.camera, configFile.image, configFile.led, 0)
-    >>> camera.SnapPhoto()
-    >>> print("done")
     done
     """
     def __init__(self, config_camera, config_image, config_led, lightvalue):
@@ -29,6 +23,9 @@ class Camera:
         self.lightvalue = lightvalue
         self.led = LED(self.config_led.gpiopin)
 
+    def dispose(self):
+        pass
+        
     def SnapPhoto(self):
         if (self.config_camera.cameratype.upper() == 'PI'):
             logging.debug("Using PI camera")

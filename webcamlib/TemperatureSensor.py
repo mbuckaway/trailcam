@@ -186,25 +186,6 @@ class TemperatureSensor:
         MP3115A2 - temperature and pressure
 
         Reading pressure from a sensor that does not support it will return 0
-
-    >>> configFile = Config('config-test-ds18b20.json')
-    >>> sensor = TemperatureSensor(configFile.temperature)
-    >>> print(str(sensor.pressure))
-    0
-    >>> print(str(sensor.temperature))
-    20
-    >>> configFile = Config('config-test-bmp280.json')
-    >>> sensor = TemperatureSensor(configFile.temperature)
-    >>> print(str(sensor.pressure))
-    980
-    >>> print(str(sensor.temperature))
-    20
-    >>> configFile = Config('config-test-mp3115a2.json')
-    >>> sensor = TemperatureSensor(configFile.temperature)
-    >>> print(str(sensor.pressure))
-    980
-    >>> print(str(sensor.temperature))
-    20
     """
     def __init__(self, temperature_config):
         try:

@@ -3,12 +3,12 @@ from webcamlib.Config import Config
 
 class TestConfigMethods(unittest.TestCase):
     def setUp(self):
-        self.configFile = Config('config-test.json')
+        self.configFile = Config('tests/config-test.json')
 
     def tearDown(self):
         self.configFile.dispose()
 
-    def test_config(self):
+    def runTest(self):
         self.assertEqual('v4l', self.configFile.camera.cameratype)
         self.assertEqual('/dev/video0', self.configFile.camera.device)
         self.assertEqual(2, self.configFile.camera.delay)

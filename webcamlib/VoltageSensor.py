@@ -62,14 +62,8 @@ class VoltageSensor:
     """ Main Class to read a Light sensor. Currently, the supported sensors are:
         INA209 - Volage/Current
         ..additional chips may be added in the future
-
-    >>> configFile = Config('config-test-bh1750.json')
-    >>> sensor = VoltageSensor(configFile.voltagesensor)
-    >>> print("Bus Voltage:   {} V".format(sensor.voltage))
-    100
-    >>> print("Current:       {} mA".format(sensor.current))
-    100
     """
+    
     def __init__(self, voltagesensor_config):
         try:
             if (voltagesensor_config.sensortype.upper() == "BH1750"):
@@ -80,8 +74,12 @@ class VoltageSensor:
             logging.error("Unable to find sensor: " + str(e.args))
 
     @property
-    def lightlevel(self):
+    def voltage(self):
         return self.sensor.voltage
+
+    @property
+    def current(self):
+        return self.sensor.current
 
     @property
     def bus(self):
