@@ -5,3 +5,4 @@ __pycache__/
 tests/__pycache__/
 webcamlib/__pycache__/
 *.log
+sendsms.py

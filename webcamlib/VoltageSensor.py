@@ -63,7 +63,7 @@ class VoltageSensor:
         INA209 - Volage/Current
         ..additional chips may be added in the future
     """
-    
+
     def __init__(self, voltagesensor_config):
         try:
             if (voltagesensor_config.sensortype.upper() == "BH1750"):
@@ -72,6 +72,7 @@ class VoltageSensor:
                 raise ConfigError("Invalid voltage level sensor type: " + voltagesensor_config.sensortype)
         except DeviceError as e:
             logging.error("Unable to find sensor: " + str(e.args))
+            raise e
 
     @property
     def voltage(self):

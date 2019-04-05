@@ -64,7 +64,7 @@ class ConfigTemperature:
 
     @property
     def sensortype(self):
-        """ Sensor types are mp3115a2 or BMP280 """
+        """ Sensor types are mp3115a2 or BMP280 or ds18b20"""
         return self.property_type.upper()
 
     @property
@@ -317,6 +317,89 @@ class ConfigTwitter:
     def accesssecret(self):
         return self.property_accesssecret
 
+class ConfigHWMon:
+    """ HWMon config section """
+    def __init__(self, object):
+        try:
+            twilio_section = object['twilio']
+            self.property_twilio_enabled = twilio_section['enabled']
+            self.property_twilio_account_sid = twilio_section['account_sid']
+            self.property_twilio_auth_token = twilio_section['auth_token']
+            self.property_twilio_phone_number = twilio_section['phone_number']
+
+            message_section = object['message']
+            self.property_message_warning = message_section['warning']
+            self.property_message_shutdown = message_section['shutdown']
+
+            self.property_smslimit = object['smslimit']
+
+            # Don't bother with the phone numbers if SMS is disabled
+            if (self.property_twilio_enabled):
+                self.property_phone_numbers = object['phone_numbers']
+
+            minvoltage_section = object['min_voltage']
+            self.property_warning_voltage = minvoltage_section['warning']
+            self.property_shutdown_voltage = minvoltage_section['shutdown']
+            self.property_check_interval = minvoltage_section['check_interval']
+
+            self.property_datafile = object['datafile']
+            self.property_timefile = object['timefile']
+        except KeyError as e:
+            raise ConfigError('HWMon Section: ' + str(e.args))
+
+    @property
+    def twilio_enabled(self):
+        return self.property_twilio_enabled
+
+    @property
+    def twilio_account_sid(self):
+        return self.property_twilio_account_sid
+
+    @property
+    def twilio_auth_token(self):
+        return self.property_twilio_auth_token
+
+    @property
+    def twilio_phone_number(self):
+        return self.property_twilio_phone_number
+
+    @property
+    def message_warning(self):
+        return self.property_message_warning
+
+    @property
+    def message_shutdown(self):
+        return self.property_message_shutdown
+
+    @property
+    def smslimit(self):
+        return self.property_smslimit
+
+    @property
+    def phone_numbers(self):
+        return self.property_phone_numbers
+
+    @property
+    def warning_voltage(self):
+        return self.property_warning_voltage
+
+    @property
+    def shutdown_voltage(self):
+        return self.property_shutdown_voltage
+
+    @property
+    def check_interval(self):
+        return self.property_check_interval
+
+    @property
+    def datafile(self):
+        return self.property_datafile
+
+    @property
+    def timefile(self):
+        return self.property_timefile
+
+
 class Config:
     """
     A class to deal with loading and parsing the config file and all the options within
@@ -337,6 +420,7 @@ class Config:
             self.property_twitter = ConfigTwitter(self.config['twitter'], twitterenabled)
             self.property_annotate = ConfigAnnotate(self.config['annotate'])
             self.property_led = ConfigLED(self.config['led'])
+            self.property_hwmon = ConfigHWMon(self.config['hwmon'])
             logging.debug("Camera device: " + self.property_camera.device)
             logging.debug("Sensor Type: " + self.property_temperature.sensortype)
             logging.debug("Sensor Device: " + self.property_temperature.device)
@@ -393,6 +477,9 @@ class Config:
     def twitter(self):
         return self.property_twitter
 
+    @property
+    def hwmon(self):
+        return self.property_hwmon
 
 if __name__ == '__main__':
   import doctest

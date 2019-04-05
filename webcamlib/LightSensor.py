@@ -85,6 +85,7 @@ class LightSensor:
                 raise ConfigError("Invalid light level sensor type: " + lightsensor_config.sensortype)
         except DeviceError as e:
             logging.error("Unable to find sensor: " + str(e.args))
+            raise e
 
     def dispose(self):
         self.sensor.dispose()

@@ -24,5 +24,23 @@ class TestConfigMethods(unittest.TestCase):
         self.assertEqual("servername", self.configFile.ftp.server)
         self.assertEqual("CONSUMER SECRET", self.configFile.twitter.consumersecret)
 
+        self.assertTrue(self.configFile.hwmon.twilio_enabled)
+        self.assertEqual('ACCOUNT_SID', self.configFile.hwmon.twilio_account_sid)
+        self.assertEqual('AUTH_TOKEN', self.configFile.hwmon.twilio_auth_token)
+        self.assertEqual('+12262345678', self.configFile.hwmon.twilio_phone_number)
+        self.assertEqual('KW Geesecam is under voltage! Currently %%VOLTS%%V', self.configFile.hwmon.message_warning)
+        self.assertEqual('KW Geesecam is dead! Currently %%VOLTS%%V. Shutting down!', self.configFile.hwmon.message_shutdown)
+        self.assertEqual(1800, self.configFile.hwmon.smslimit)
+        self.assertTrue(type(self.configFile.hwmon.phone_numbers) is list)
+        self.assertEqual(2, len(self.configFile.hwmon.phone_numbers))
+        self.assertEqual('+12262345555', self.configFile.hwmon.phone_numbers[0])
+        self.assertEqual('+12262345556', self.configFile.hwmon.phone_numbers[1])
+
+        self.assertEqual(7.0, self.configFile.hwmon.warning_voltage)
+        self.assertEqual(6.0, self.configFile.hwmon.shutdown_voltage)
+        self.assertEqual(60, self.configFile.hwmon.check_interval)
+        self.assertEqual('/tmp/voltage.xlxs', self.configFile.hwmon.datafile)
+        self.assertEqual('/tmp/trailcamlastcheck.json', self.configFile.hwmon.timefile)
+
 if __name__ == '__main__':
     unittest.main()

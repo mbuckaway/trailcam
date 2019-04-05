@@ -17,7 +17,6 @@ class TestTemperatureSensorMethods(unittest.TestCase):
         configFile = Config('tests/config-test-ds18b20.json')
         sensor = TemperatureSensor(configFile.temperature)
         """ No pressure reading here """
-        self.assertEqual(0, sensor.pressure)
         self.assertNotEqual(0, sensor.temperature)
 
     def TestBMP280(self):

@@ -21,6 +21,23 @@ class AbstractTemperatureSensor(ABC):
     def bus(self):
         pass        
 
+class NullSensor(AbstractTemperatureSensor):
+    def __init__(self, temperature_config):
+        super().__init__(temperature_config)
+        self.property_bus = "null"
+
+    @property
+    def temperature(self):
+        return 0
+
+    @property
+    def pressure(self):
+        return 0
+
+    @property
+    def bus(self):
+        return self.property_bus
+
 class BMP280Sensor(AbstractTemperatureSensor):
     """
      Class to read the sensor BMP280 on the I2C bus
@@ -189,6 +206,8 @@ class TemperatureSensor:
     """
     def __init__(self, temperature_config):
         try:
+            self.sensor = NullSensor(temperature_config)
+            logging.debug("Found temperature sensor: " + temperature_config.sensortype.upper())
             if (temperature_config.sensortype.upper() == "DS18B20"):
                 self.sensor = DS18B20Sensor(temperature_config)
             elif (temperature_config.sensortype.upper() == "MP3115A2"):
@@ -199,6 +218,7 @@ class TemperatureSensor:
                 raise ConfigError("Invalid temperature sensor type: " + temperature_config.sensortype)
         except DeviceError as e:
             logging.error("Unable to find sensor: " + str(e.args))
+            raise e
 
     @property
     def temperature(self):
