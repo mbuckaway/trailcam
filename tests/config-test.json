@@ -63,8 +63,13 @@
             "shutdown": 6.0,
             "check_interval": 60
         },
-        "datafile": "/tmp/voltage.xlxs",
         "timefile": "/tmp/trailcamlastcheck.json"
+    },
+    "thingspeak":
+    {
+        "writekey": "WRITEKEY",
+        "channelid": 1,
+        "timeout": 15
     },
     "annotate":
     {

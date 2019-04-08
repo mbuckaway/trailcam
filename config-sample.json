@@ -39,6 +39,38 @@
         "slowcount": 5,
         "slowtime": 0.5
     },
+    "hwmon":
+    {
+        "twilio": {
+            "enabled": true,
+            "account_sid": "ACCOUNT_SID",
+            "auth_token": "AUTH_TOKEN",
+            "phone_number": "PHONE_NUMBER"
+        },
+        "message":
+        {
+            "warning": "KW Geesecam is under voltage! Currently %%VOLTS%%V",
+            "shutdown": "KW Geesecam is dead! Currently %%VOLTS%%V. Shutting down!"
+        },
+        "smslimit": 1800,
+        "phone_numbers": [
+            "+12262345678",
+            "+‭15192345678‬"
+        ],
+        "min_voltage":
+        {
+            "warning": 7.0,
+            "shutdown": 6.0,
+            "check_interval": 60
+        },
+        "timefile": "/tmp/trailcamlastcheck.json"
+    },
+    "thingspeak":
+    {
+        "writekey": "WRITEKEY",
+        "channelid": 1,
+        "timeout": 15
+    },
     "annotate":
     {
         "enabled": true,

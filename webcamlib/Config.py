@@ -341,8 +341,6 @@ class ConfigHWMon:
             self.property_warning_voltage = minvoltage_section['warning']
             self.property_shutdown_voltage = minvoltage_section['shutdown']
             self.property_check_interval = minvoltage_section['check_interval']
-
-            self.property_datafile = object['datafile']
             self.property_timefile = object['timefile']
         except KeyError as e:
             raise ConfigError('HWMon Section: ' + str(e.args))
@@ -392,12 +390,35 @@ class ConfigHWMon:
         return self.property_check_interval
 
     @property
-    def datafile(self):
-        return self.property_datafile
-
-    @property
     def timefile(self):
         return self.property_timefile
+
+class ConfigThingSpeak:
+    """ ThinkSpeak config section """
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_writekey = object['writekey']
+            self.property_channelid = object['channelid']
+            self.property_timeout = object['timeout']
+        except KeyError as e:
+            raise ConfigError('ThinkSpeak Section: ' + str(e.args))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def writekey(self):
+        return self.property_writekey
+
+    @property
+    def channelid(self):
+        return self.property_channelid
+
+    @property
+    def timeout(self):
+        return self.property_timeout
 
 
 class Config:
@@ -421,6 +442,7 @@ class Config:
             self.property_annotate = ConfigAnnotate(self.config['annotate'])
             self.property_led = ConfigLED(self.config['led'])
             self.property_hwmon = ConfigHWMon(self.config['hwmon'])
+            self.property_thingspeak = ConfigThingSpeak(self.config['thingspeak'])
             logging.debug("Camera device: " + self.property_camera.device)
             logging.debug("Sensor Type: " + self.property_temperature.sensortype)
             logging.debug("Sensor Device: " + self.property_temperature.device)
@@ -480,6 +502,10 @@ class Config:
     @property
     def hwmon(self):
         return self.property_hwmon
+
+    @property
+    def thingspeak(self):
+        return self.property_thingspeak
 
 if __name__ == '__main__':
   import doctest
