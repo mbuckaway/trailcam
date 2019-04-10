@@ -59,14 +59,14 @@
         ],
         "min_voltage":
         {
-            "warning": 7.0,
-            "shutdown": 6.0,
-            "check_interval": 60
+            "warning": 10.0,
+            "shutdown": 9.1
         },
         "timefile": "/tmp/trailcamlastcheck.json"
     },
     "thingspeak":
     {
+        "enabled": true,
         "writekey": "WRITEKEY",
         "channelid": 1,
         "timeout": 15
@@ -102,7 +102,25 @@
         "AccessKey" : "ACCESS KEY",
         "AccessSecret": "ACCESS SECRET"
     },
-    "timestamp": {
-        "filename": "/home/user/timestamp.json"
+    "scheduler": 
+    {
+        "interval": 60,
+        "processes": [
+            {
+                "enabled": true,
+                "count": 1,
+                "functions": ["sensors", "senddata", "checkvalues"]
+            },
+            {
+                "enabled": false,
+                "count": 5,
+                "functions": ["annotate", "photo", "ftpupload"]
+            },
+            {
+                "enabled": false,
+                "count": 60,
+                "functions": ["twitterupload"]
+            }
+        ]
     }
 }

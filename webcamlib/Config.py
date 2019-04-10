@@ -340,7 +340,6 @@ class ConfigHWMon:
             minvoltage_section = object['min_voltage']
             self.property_warning_voltage = minvoltage_section['warning']
             self.property_shutdown_voltage = minvoltage_section['shutdown']
-            self.property_check_interval = minvoltage_section['check_interval']
             self.property_timefile = object['timefile']
         except KeyError as e:
             raise ConfigError('HWMon Section: ' + str(e.args))
@@ -386,10 +385,6 @@ class ConfigHWMon:
         return self.property_shutdown_voltage
 
     @property
-    def check_interval(self):
-        return self.property_check_interval
-
-    @property
     def timefile(self):
         return self.property_timefile
 
@@ -420,6 +415,46 @@ class ConfigThingSpeak:
     def timeout(self):
         return self.property_timeout
 
+class ConfigProcess:
+    """ Scheduler Process item section """
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_count = int(object['count'])
+            self.property_functions = object['functions']
+        except KeyError as e:
+            raise ConfigError('Scheduler Process Section: ' + str(e.args))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def count(self):
+        return self.property_count
+
+    @property
+    def functions(self):
+        return self.property_functions
+
+class ConfigScheduler:
+    """ Scheduler config section """
+    def __init__(self, object):
+        try:
+            self.property_interval = int(object['interval'])
+            self.property_processes = []
+            for process in object['processes']:
+                self.property_processes.append(ConfigProcess(process))
+        except KeyError as e:
+            raise ConfigError('Scheduler Section: ' + str(e.args))
+
+    @property
+    def interval(self):
+        return self.property_interval
+
+    @property
+    def processes(self):
+        return self.property_processes
 
 class Config:
     """
@@ -443,6 +478,7 @@ class Config:
             self.property_led = ConfigLED(self.config['led'])
             self.property_hwmon = ConfigHWMon(self.config['hwmon'])
             self.property_thingspeak = ConfigThingSpeak(self.config['thingspeak'])
+            self.property_scheduler = ConfigScheduler(self.config['scheduler'])
             logging.debug("Camera device: " + self.property_camera.device)
             logging.debug("Sensor Type: " + self.property_temperature.sensortype)
             logging.debug("Sensor Device: " + self.property_temperature.device)
@@ -453,8 +489,10 @@ class Config:
 
         except KeyError as e:
             logging.error("Invalid or missing key in section config: " + str(e.args))
+            raise e
         except ConfigError as e:
             logging.error("Invalid or missing key in config: " + e.section)
+            raise e
 
     def dispose(self):
         pass
@@ -507,8 +545,7 @@ class Config:
     def thingspeak(self):
         return self.property_thingspeak
 
-if __name__ == '__main__':
-  import doctest
-  doctest.testmod()
-
+    @property
+    def scheduler(self):
+        return self.property_scheduler
 

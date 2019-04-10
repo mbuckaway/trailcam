@@ -11,6 +11,21 @@ from webcamlib.Camera import Camera
 from webcamlib.FtpFile import FtpFile
 from webcamlib.TwitterPost import TwitterPost
 
+def main_loop(config):
+    annotate = Annotate(config.annotate, config.image, config.temperature, config.lightsensor)
+    annotate.ReadSensors()
+
+    camera = Camera(config.camera, config.image, config.led, annotate.light_level)
+    camera.SnapPhoto()
+
+    annotate.UpdateImage()
+
+    twitterpost = TwitterPost(config.image.filename, config.twitter, annotate.annotation_twitter)
+    twitterpost.post()
+
+    ftpfile = FtpFile(config.ftp, config.image)
+    ftpfile.sendfile()
+
 def main(prog_name):
     parser = argparse.ArgumentParser(description='Trail Webcam utility')
     parser.add_argument('-l', '--logfile', default='trailcam.log', help='logging filename')
@@ -29,20 +44,7 @@ def main(prog_name):
 
     logging.debug('Loading config: ' + args.config)
     config = Config(args.config, args.ftp, args.twitter)
-
-    annotate = Annotate(config.annotate, config.image, config.temperature, config.lightsensor)
-    annotate.ReadSensors()
-
-    camera = Camera(config.camera, config.image, config.led, annotate.light_level)
-    camera.SnapPhoto()
-
-    annotate.UpdateImage()
-
-    twitterpost = TwitterPost(config.image.filename, config.twitter, annotate.annotation_twitter)
-    twitterpost.post()
-
-    ftpfile = FtpFile(config.ftp, config.image)
-    ftpfile.sendfile()
+    main_loop(config)
 
 if __name__ == '__main__':
     try:

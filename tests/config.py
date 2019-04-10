@@ -36,11 +36,33 @@ class TestConfigMethods(unittest.TestCase):
         self.assertEqual('+12262345555', self.configFile.hwmon.phone_numbers[0])
         self.assertEqual('+12262345556', self.configFile.hwmon.phone_numbers[1])
 
-        self.assertEqual(7.0, self.configFile.hwmon.warning_voltage)
-        self.assertEqual(6.0, self.configFile.hwmon.shutdown_voltage)
-        self.assertEqual(60, self.configFile.hwmon.check_interval)
-        self.assertEqual('/tmp/voltage.xlxs', self.configFile.hwmon.datafile)
+        self.assertEqual(10.0, self.configFile.hwmon.warning_voltage)
+        self.assertEqual(9.1, self.configFile.hwmon.shutdown_voltage)
         self.assertEqual('/tmp/trailcamlastcheck.json', self.configFile.hwmon.timefile)
+
+        self.assertEqual(60, self.configFile.scheduler.interval)
+        self.assertEqual(3, len(self.configFile.scheduler.processes))
+        process = self.configFile.scheduler.processes[0]
+        self.assertTrue(process.enabled)
+        self.assertEqual(1, process.count)
+        self.assertEqual(3, len(process.functions))
+        self.assertEqual("sensors", process.functions[0])
+        self.assertEqual("senddata", process.functions[1])
+        self.assertEqual("checkvalues", process.functions[2])
+
+        process = self.configFile.scheduler.processes[1]
+        self.assertFalse(process.enabled)
+        self.assertEqual(5, process.count)
+        self.assertEqual(3, len(process.functions))
+        self.assertEqual("annotate", process.functions[0])
+        self.assertEqual("photo", process.functions[1])
+        self.assertEqual("ftpupload", process.functions[2])
+
+        process = self.configFile.scheduler.processes[2]
+        self.assertFalse(process.enabled)
+        self.assertEqual(60, process.count)
+        self.assertEqual(1, len(process.functions))
+        self.assertEqual("twitterupload", process.functions[0])
 
 if __name__ == '__main__':
     unittest.main()
