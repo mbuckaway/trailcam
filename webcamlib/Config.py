@@ -3,6 +3,8 @@ import logging
 import distutils.util
 from webcamlib.Exceptions import ConfigError
 
+config_logger = logging.getLogger('config')
+
 class ConfigCamera:
     """ Camera section configuration """
 
@@ -45,6 +47,30 @@ class ConfigCamera:
     @property
     def rotation(self):
         return self.property_rotation
+
+class ConfigSensors:
+    """ Sensor section configuration """
+
+    def __init__(self, object):
+        try:
+            self.property_temperature = ConfigTemperature(object['temperature'])
+            self.property_light = ConfigLightSensor(object['light'])
+            self.property_voltage = ConfigVoltageSensor(object['voltage'])
+        except KeyError as e:
+            raise ConfigError("Sensors Section: " + str(e.args))
+
+    @property
+    def temperature(self):
+        return self.property_temperature
+
+    @property
+    def light(self):
+        return self.property_light
+
+    @property
+    def voltage(self):
+        return self.property_voltage
+
 
 class ConfigTemperature:
     """ Sensor section configuration """
@@ -248,7 +274,7 @@ class ConfigFTP:
         try:
             self.property_enabled = object['enabled']
             if (enabled == False):
-                logging.warning("FTP Disabled!")
+                config_logger.warning("FTP Disabled!")
                 self.property_enabled = False
             self.property_server = object['server']
             self.property_user = object['user']
@@ -288,7 +314,7 @@ class ConfigTwitter:
         try:
             self.property_enabled = object['enabled']
             if (enabled == False):
-                logging.warning("Twitter Disabled!")
+                config_logger.warning("Twitter Disabled!")
                 self.property_enabled = False
             self.property_consumerkey = object['ConsumerKey']
             self.property_consumersecret = object['ConsumerSecret']
@@ -321,6 +347,7 @@ class ConfigHWMon:
     """ HWMon config section """
     def __init__(self, object):
         try:
+            self.property_shutdown_enabled = object['shutdown_enabled']
             twilio_section = object['twilio']
             self.property_twilio_enabled = twilio_section['enabled']
             self.property_twilio_account_sid = twilio_section['account_sid']
@@ -344,6 +371,10 @@ class ConfigHWMon:
         except KeyError as e:
             raise ConfigError('HWMon Section: ' + str(e.args))
 
+    @property
+    def shutdown_enabled(self):
+        return self.property_shutdown_enabled
+        
     @property
     def twilio_enabled(self):
         return self.property_twilio_enabled
@@ -420,6 +451,7 @@ class ConfigProcess:
     def __init__(self, object):
         try:
             self.property_enabled = object['enabled']
+            self.property_description = object['description']
             self.property_count = int(object['count'])
             self.property_functions = object['functions']
         except KeyError as e:
@@ -428,6 +460,10 @@ class ConfigProcess:
     @property
     def enabled(self):
         return self.property_enabled
+
+    @property
+    def description(self):
+        return self.property_description
 
     @property
     def count(self):
@@ -446,7 +482,7 @@ class ConfigScheduler:
             for process in object['processes']:
                 self.property_processes.append(ConfigProcess(process))
         except KeyError as e:
-            raise ConfigError('Scheduler Section: ' + str(e.args))
+            raise ConfigError('Scheduler Section: ' + str(e.args[0]))
 
     @property
     def interval(self):
@@ -468,9 +504,7 @@ class Config:
         # Load the sections of the config
         try:
             self.property_camera = ConfigCamera(self.config['camera'])
-            self.property_temperature = ConfigTemperature(self.config['temperature'])
-            self.property_lightsensor = ConfigLightSensor(self.config['lightsensor'])
-            self.property_voltagesensor = ConfigVoltageSensor(self.config['voltagesensor'])
+            self.property_sensors = ConfigSensors(self.config['sensors'])
             self.property_image = ConfigImage(self.config['image'])
             self.property_ftp = ConfigFTP(self.config['ftp'], ftpenabled)
             self.property_twitter = ConfigTwitter(self.config['twitter'], twitterenabled)
@@ -479,19 +513,17 @@ class Config:
             self.property_hwmon = ConfigHWMon(self.config['hwmon'])
             self.property_thingspeak = ConfigThingSpeak(self.config['thingspeak'])
             self.property_scheduler = ConfigScheduler(self.config['scheduler'])
-            logging.debug("Camera device: " + self.property_camera.device)
-            logging.debug("Sensor Type: " + self.property_temperature.sensortype)
-            logging.debug("Sensor Device: " + self.property_temperature.device)
-            logging.debug("Image size: " + str(self.property_image.width) + "x" + str(self.property_image.height))
-            logging.debug("Image file: " + self.property_image.filename)
-            logging.debug("Ftp Server: " + self.property_ftp.server)
-            logging.debug("Ftp User: " + self.property_ftp.user)
+            config_logger.debug("Camera device: " + self.property_camera.device)
+            config_logger.debug("Image size: " + str(self.property_image.width) + "x" + str(self.property_image.height))
+            config_logger.debug("Image file: " + self.property_image.filename)
+            config_logger.debug("Ftp Server: " + self.property_ftp.server)
+            config_logger.debug("Ftp User: " + self.property_ftp.user)
 
         except KeyError as e:
-            logging.error("Invalid or missing key in section config: " + str(e.args))
+            config_logger.exception("Invalid or missing key in section config: %s", e)
             raise e
         except ConfigError as e:
-            logging.error("Invalid or missing key in config: " + e.section)
+            config_logger.exception("Invalid or missing key in config: %s", e)
             raise e
 
     def dispose(self):
@@ -506,16 +538,8 @@ class Config:
         return self.property_camera
 
     @property
-    def temperature(self):
-        return self.property_temperature
-
-    @property
-    def lightsensor(self):
-        return self.property_lightsensor
-
-    @property
-    def voltagesensor(self):
-        return self.property_voltagesensor
+    def sensors(self):
+        return self.property_sensors
 
     @property
     def image(self):

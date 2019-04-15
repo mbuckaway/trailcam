@@ -8,27 +8,29 @@
         "elevation": 400,
         "rotation": 180
     },
-    "temperature":
+    "sensors":
     {
-        "enabled": true,
-        "type": "bmp280",
-        "sea_level_pressure": 1029.00,
-        "device": "1-0076",
-        "rounding": 1
-    },
-    "lightsensor":
-    {
-        "enabled": true,
-        "type": "bh1750",
-        "device": "1-0023",
-        "rounding": 1
-    },
-    "voltagesensor":
-    {
-        "enabled": true,
-        "type": "bh1750",
-        "address": "0x40",
-        "rounding": 1
+        "temperature":
+        {
+            "enabled": true,
+            "type": "bmp280",
+            "device": "1-0076",
+            "rounding": 1
+        },
+        "light":
+        {
+            "enabled": true,
+            "type": "bh1750",
+            "device": "1-0023",
+            "rounding": 1
+        },
+        "voltage":
+        {
+            "enabled": true,
+            "type": "bh1750",
+            "address": "0x40",
+            "rounding": 1
+        }
     },
     "led":
     {
@@ -41,6 +43,7 @@
     },
     "hwmon":
     {
+        "shutdown_enabled": false,
         "twilio": {
             "enabled": true,
             "account_sid": "ACCOUNT_SID",
@@ -66,6 +69,7 @@
     },
     "thingspeak":
     {
+        "enabled": true,
         "writekey": "WRITEKEY",
         "channelid": 1,
         "timeout": 15
@@ -107,16 +111,19 @@
         "processes": [
             {
                 "enabled": true,
+                "description": "Every Minute: Sensors",
                 "count": 1,
                 "functions": ["sensors", "senddata", "checkvalues"]
             },
             {
-                "enabled": false,
+                "enabled": true,
+                "description": "Every 5 Minutes: Take photo and upload",
                 "count": 5,
                 "functions": ["annotate", "photo", "ftpupload"]
             },
             {
-                "enabled": false,
+                "enabled": true,
+                "description": "Every hour: Twitter post",
                 "count": 60,
                 "functions": ["twitterupload"]
             }

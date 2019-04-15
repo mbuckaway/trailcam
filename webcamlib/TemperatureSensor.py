@@ -207,15 +207,16 @@ class TemperatureSensor:
     def __init__(self, temperature_config):
         try:
             self.sensor = NullSensor(temperature_config)
-            logging.debug("Found temperature sensor: " + temperature_config.sensortype.upper())
-            if (temperature_config.sensortype.upper() == "DS18B20"):
-                self.sensor = DS18B20Sensor(temperature_config)
-            elif (temperature_config.sensortype.upper() == "MP3115A2"):
-                self.sensor = MP3115Sensor(temperature_config)
-            elif (temperature_config.sensortype.upper() == "BMP280"):
-                self.sensor = BMP280Sensor(temperature_config)
-            else:
-                raise ConfigError("Invalid temperature sensor type: " + temperature_config.sensortype)
+            if (temperature_config.enabled):
+                logging.debug("Found temperature sensor: " + temperature_config.sensortype.upper())
+                if (temperature_config.sensortype.upper() == "DS18B20"):
+                    self.sensor = DS18B20Sensor(temperature_config)
+                elif (temperature_config.sensortype.upper() == "MP3115A2"):
+                    self.sensor = MP3115Sensor(temperature_config)
+                elif (temperature_config.sensortype.upper() == "BMP280"):
+                    self.sensor = BMP280Sensor(temperature_config)
+                else:
+                    raise ConfigError("Invalid temperature sensor type: " + temperature_config.sensortype)
         except DeviceError as e:
             logging.error("Unable to find sensor: " + str(e.args))
             raise e

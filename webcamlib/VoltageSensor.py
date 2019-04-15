@@ -24,6 +24,23 @@ class AbstractVoltageSensor(ABC):
     def bus(self):
         pass        
 
+class NullSensor(AbstractVoltageSensor):
+    def __init__(self, voltagesensor_config):
+        super().__init__(voltagesensor_config)
+        self.property_bus = "null"
+
+    @property
+    def voltage(self):
+        return 0
+
+    @property
+    def current(self):
+        return 0
+
+    @property
+    def bus(self):
+        return self.property_bus
+
 
 class INA219Sensor(AbstractVoltageSensor):
     """
@@ -66,21 +83,30 @@ class VoltageSensor:
 
     def __init__(self, voltagesensor_config):
         try:
-            if (voltagesensor_config.sensortype.upper() == "BH1750"):
-                self.sensor = INA219Sensor(voltagesensor_config)
-            else:
-                raise ConfigError("Invalid voltage level sensor type: " + voltagesensor_config.sensortype)
+            self.voltagesensor_config = voltagesensor_config
+            self.sensor = NullSensor(voltagesensor_config)
+            if (voltagesensor_config.enabled):
+                if (voltagesensor_config.sensortype.upper() == "INA219"):
+                    self.sensor = INA219Sensor(voltagesensor_config)
+                else:
+                    raise ConfigError("Invalid voltage level sensor type: " + voltagesensor_config.sensortype)
         except DeviceError as e:
             logging.error("Unable to find sensor: " + str(e.args))
             raise e
 
     @property
     def voltage(self):
-        return self.sensor.voltage
+        result = self.sensor.voltage
+        if (self.voltagesensor_config.rounding != -1):
+            result = round(result, self.voltagesensor_config.rounding)
+        return result
 
     @property
     def current(self):
-        return self.sensor.current
+        result = self.sensor.current
+        if (self.voltagesensor_config.rounding != -1):
+            result = round(result, self.voltagesensor_config.rounding)
+        return result 
 
     @property
     def bus(self):

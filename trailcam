@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 import webcamlib
 from webcamlib import cli_webcam
-import logging
-from logging_configurator import configure_logging
 
 if __name__ == '__main__':
-    try:
-        configure_logging()
-        cli_webcam.main("trailcam")
-    except Exception as e:
-        logging.error("Unhandled exception caught: " + str(e.args))
+    cli_webcam.main("trailcam")

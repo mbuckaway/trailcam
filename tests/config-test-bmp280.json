@@ -7,13 +7,30 @@
         "longitude": "-80.4841633",
         "elevation": 400
     },
-    "temperature":
+    "sensors":
     {
-        "enabled": true,
-        "type": "bmp280",
-        "sea_level_pressure": 1029.00,
-        "device": "1-0076",
-        "rounding": 1
+        "temperature":
+        {
+            "enabled": true,
+            "type": "bmp280",
+            "sea_level_pressure": 1029.00,
+            "device": "1-0076",
+            "rounding": 1
+        },
+        "light":
+        {
+            "enabled": true,
+            "type": "bh1750",
+            "device": "1-0023",
+            "rounding": 1
+        },
+        "voltage":
+        {
+            "enabled": true,
+            "type": "ina219",
+            "address": "0x40",
+            "rounding": 1
+        }
     },
     "image":
     {
@@ -37,7 +54,61 @@
         "AccessKey" : "ACCESS KEY",
         "AccessSecret": "ACCESS SECRET"
     },
-    "timestamp": {
-        "filename": "/home/user/timestamp.json"
+    "thingspeak":
+    {
+        "enabled": true,
+        "writekey": "WRITEKEY",
+        "channelid": 1,
+        "timeout": 15
+    },
+    "hwmon":
+    {
+        "shutdown_enabled": false,
+        "twilio": {
+            "enabled": true,
+            "account_sid": "ACCOUNT_SID",
+            "auth_token": "AUTH_TOKEN",
+            "phone_number": "+12262345678"
+        },
+        "message":
+        {
+            "warning": "KW Geesecam is under voltage! Currently %%VOLTS%%V",
+            "shutdown": "KW Geesecam is dead! Currently %%VOLTS%%V. Shutting down!"
+        },
+        "smslimit": 1800,
+        "phone_numbers": [
+            "+12262345555",
+            "+12262345556"
+        ],
+        "min_voltage":
+        {
+            "warning": 10.0,
+            "shutdown": 9.1
+        },
+        "timefile": "/tmp/trailcamlastcheck.json"
+    },
+    "scheduler": 
+    {
+        "interval": 60,
+        "processes": [
+            {
+                "enabled": true,
+                "description": "Every Minute: Sensors",
+                "count": 1,
+                "functions": ["sensors", "senddata", "checkvalues"]
+            },
+            {
+                "enabled": true,
+                "description": "Every 5 Minutes: Take photo and upload",
+                "count": 5,
+                "functions": ["annotate", "photo", "ftpupload"]
+            },
+            {
+                "enabled": true,
+                "description": "Every hour: Twitter post",
+                "count": 60,
+                "functions": ["twitterupload"]
+            }
+        ]
     }
 }

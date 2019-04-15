@@ -15,7 +15,7 @@ class TestVoltageSensorMethods(unittest.TestCase):
         self.configFile.dispose()
 
     def runTest(self):
-        sensor = VoltageSensor(self.configFile.voltagesensor)
+        sensor = VoltageSensor(self.configFile.sensors.voltage)
         self.assertNotEqual(0, sensor.voltage)
         self.assertNotEqual(0, sensor.current)
         print("Voltage: " + str(sensor.voltage))

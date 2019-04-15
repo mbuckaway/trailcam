@@ -20,6 +20,18 @@ class AbstractLightSensor(ABC):
     def dispose(self):
         pass
 
+class NullSensor(AbstractLightSensor):
+    def __init__(self, lightsensor_config):
+        super().__init__(lightsensor_config)
+        self.property_bus = "null"
+
+    @property
+    def lightlevel(self):
+        return 0
+    @property
+    def bus(self):
+        return self.property_bus
+
 
 class BH1750Sensor(AbstractLightSensor):
     """
@@ -78,13 +90,16 @@ class LightSensor:
         Reading pressure from a sensor that does not support it will return 0
     """
     def __init__(self, lightsensor_config):
+        self.logger = logging.getLogger('lightsensor')
         try:
-            if (lightsensor_config.sensortype.upper() == "BH1750"):
-                self.sensor = BH1750Sensor(lightsensor_config)
-            else:
-                raise ConfigError("Invalid light level sensor type: " + lightsensor_config.sensortype)
+            self.sensor = NullSensor(lightsensor_config)
+            if (lightsensor_config.enabled):
+                if (lightsensor_config.sensortype.upper() == "BH1750"):
+                    self.sensor = BH1750Sensor(lightsensor_config)
+                else:
+                    raise ConfigError("Invalid light level sensor type: " + lightsensor_config.sensortype)
         except DeviceError as e:
-            logging.error("Unable to find sensor: " + str(e.args))
+            self.logger.error("Unable to find sensor: " + str(e.args))
             raise e
 
     def dispose(self):

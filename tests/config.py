@@ -1,5 +1,6 @@
 import unittest
 from webcamlib.Config import Config
+import logging
 
 class TestConfigMethods(unittest.TestCase):
     def setUp(self):
@@ -15,9 +16,9 @@ class TestConfigMethods(unittest.TestCase):
         self.assertEqual('43.4873066', self.configFile.camera.latitude)
         self.assertEqual('-80.4841633', self.configFile.camera.longitude)
         self.assertEqual(400, self.configFile.camera.elevation)
-        self.assertTrue(self.configFile.temperature.enabled)
-        self.assertTrue(self.configFile.lightsensor.enabled)
-        self.assertTrue(self.configFile.voltagesensor.enabled)
+        self.assertTrue(self.configFile.sensors.temperature.enabled)
+        self.assertTrue(self.configFile.sensors.light.enabled)
+        self.assertTrue(self.configFile.sensors.voltage.enabled)
         self.assertEqual(1440, self.configFile.image.width)
         self.assertEqual(810, self.configFile.image.height)
         self.assertEqual("/tmp/webcam.jpg", self.configFile.image.filename)
@@ -65,4 +66,13 @@ class TestConfigMethods(unittest.TestCase):
         self.assertEqual("twitterupload", process.functions[0])
 
 if __name__ == '__main__':
+    root_logger = logging.getLogger('')
+    # Setup logging to the screen
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('[%(asctime)s] [%(name)-15.15s] [%(levelname)-7.7s] %(message)s')
+    ch.setFormatter(formatter)
+    # add the handlers to logger
+    root_logger.addHandler(ch)
     unittest.main()

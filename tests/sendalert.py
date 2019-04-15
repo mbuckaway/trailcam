@@ -1,8 +1,7 @@
 import unittest
 from webcamlib.Config import Config
 from webcamlib.SendAlert import SendAlert
-from logging_configurator import configure_logging
-
+import logging
 import os
 
 """
@@ -10,7 +9,6 @@ import os
 """
 class TestSendSMSMethods(unittest.TestCase):
     def setUp(self):
-        configure_logging()
         self.config = Config('../config.json')
 
     def tearDown(self):
@@ -35,4 +33,13 @@ class TestSendSMSMethods(unittest.TestCase):
         self.assertTrue(success)
 
 if __name__ == '__main__':
+    root_logger = logging.getLogger('')
+    # Setup logging to the screen
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    # create formatter and add it to the handlers
+    formatter = logging.Formatter('[%(asctime)s] [%(name)-15.15s] [%(levelname)-7.7s] %(message)s')
+    ch.setFormatter(formatter)
+    # add the handlers to logger
+    root_logger.addHandler(ch)
     unittest.main()
