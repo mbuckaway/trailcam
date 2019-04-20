@@ -6,14 +6,14 @@ import datetime
 class Annotate:
     def __init__(self, config, data):
         self.logger = logging.getLogger('annotate')
-        self.config = config
+        self.annotate = config
         self.data = data
 
     def Annotate(self):
         self.logger.debug("Getting temperature...")
         date = datetime.datetime.now().strftime("%B %d, %Y %I:%M%p")
         # Let's substitude our vars
-        line = self.config.annotate.format
+        line = self.annotate.format
         line = line.replace('%%DATE%%', date)
         line = line.replace('%%TEMP%%', str(self.data.temperature))
         line = line.replace('%%PRES%%', str(self.data.pressure))
@@ -21,7 +21,7 @@ class Annotate:
         self.data.annotation_photo = line
         self.logger.debug("Annotation (photo): " + line)
 
-        line = self.config.annotate.format_twitter
+        line = self.annotate.format_twitter
         line = line.replace('%%DATE%%', date)
         line = line.replace('%%TEMP%%', str(self.data.temperature))
         line = line.replace('%%PRES%%', str(self.data.pressure))

@@ -1,7 +1,7 @@
 Pillow: https://github.com/python-pillow/Pillow
 ephem
-logging_configurator
 picamera
 python-daemon
 twilio
 unittest
+adafruit_ina219

@@ -27,6 +27,12 @@ class TestSchedulerMethods(unittest.TestCase):
         self.assertEqual("Welcome", schedulerData.annotation_photo)
         schedulerData.annotation_twitter = "twitter"
         self.assertEqual("twitter", schedulerData.annotation_twitter)
+        self.assertFalse(schedulerData.haserror)
+        schedulerData.lasterror = "FTP Error"
+        self.assertTrue(schedulerData.haserror)
+        self.assertEqual("FTP Error", schedulerData.lasterror)
+        schedulerData.clearerror()
+        self.assertFalse(schedulerData.haserror)
 
         functions = [
             "annotate",

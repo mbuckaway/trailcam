@@ -41,8 +41,8 @@ class Camera:
     def blinkled(self):
         if (self.config.led.enabled):
             self.logger.debug("Flashing Indicator Led")
-            self.led.blink(self.config.leg.slowtime, self.config.leg.slowtime, self.config.leg.slowcount, False)
-            self.led.blink(self.config.leg.fasttime, self.config.leg.fasttime, self.config.leg.fastcount, False)
+            self.led.blink(self.config.led.slowtime, self.config.led.slowtime, self.config.led.slowcount, False)
+            self.led.blink(self.config.led.fasttime, self.config.led.fasttime, self.config.led.fastcount, False)
             self.led.on()
 
     def ledoff(self):

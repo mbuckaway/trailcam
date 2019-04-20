@@ -67,6 +67,7 @@ class SchedulerData:
         self.property_light = 400
         self.property_annotation_photo = "This is a test"
         self.property_annotation_twitter = "This is a test"
+        self.property_error = []
 
     @property
     def temperature(self):
@@ -123,6 +124,23 @@ class SchedulerData:
     @annotation_twitter.setter
     def annotation_twitter(self, value):
         self.property_annotation_twitter = value
+
+    @property
+    def haserror(self):
+        return len(self.property_error)>0
+
+    def clearerror(self):
+        self.property_error.clear()
+
+    @property
+    def lasterror(self):
+        sep = ": "
+        errorstr = sep.join(self.property_error)
+        return errorstr
+
+    @lasterror.setter
+    def lasterror(self, value):
+        self.property_error.append(value)
 
 class Scheduler:
     """
@@ -286,6 +304,8 @@ class Scheduler:
                 subprocess.call("/sbin/halt", shell=False)
                 self.stop()
                 sys.exit()
+        else:
+            self.logger.debug("Voltage values acceptable")
 
     def annotate(self):
         annotate = Annotate(self.config.annotate, self.data)
@@ -297,7 +317,7 @@ class Scheduler:
         camera.AnnotateImage()
 
     def ftpupload(self):
-        ftpfile = FtpFile(self.config)
+        ftpfile = FtpFile(self.config, self.data)
         ftpfile.sendfile()
 
     def twitterupload(self):

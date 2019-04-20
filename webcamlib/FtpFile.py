@@ -7,9 +7,10 @@ class FtpFile:
     """ 
     Ftp File uploads the webcam image to the remote directory, after archiving the old image
     """
-    def __init__(self, config):
+    def __init__(self, config, data):
         self.logger = logging.getLogger('ftpfile')
         self.config = config
+        self.data = data
         
     def ftpmkdir(self, directory):
         path = PosixPath(directory)
@@ -49,6 +50,7 @@ class FtpFile:
                     self.session.rename(self.config.ftp.remotefile, archivefilename)
                 except Exception as e:
                     self.logger.error("Error archiving file: " + str(e.args))
+                    self.data.lasterror = "Archiving file failed"
 
                 photo = open(self.config.image.filename,'rb')                  # file to send
                 self.session.storbinary('STOR ' + self.config.ftp.remotefile, photo)     # send the file
@@ -57,7 +59,12 @@ class FtpFile:
                 self.session.close()
                 self.logger.info("Upload completed successfully.")
             except NameError as e:
-                self.logger.error('Failed to FTP file: NameError in script: ' + str(e.args))
+                self.logger.exception('Failed to FTP file: NameError in script: %s', e)
+                self.data.lasterror = "FTP file failed"
             except Exception as e:
-                self.logger.error('Failed to FTP file: ' + str(e.args))
+                self.logger.exception('Failed to FTP file: %s', e)
+                self.data.lasterror = "FTP file failed"
+        else:
+            self.logger.warn("FTP upload disabled")
+            self.data.lasterror = "FTP upload disabled"
 
