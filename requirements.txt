@@ -1,14 +1,7 @@
 Pillow: https://github.com/python-pillow/Pillow
-adafruit_ina219
 ephem
 picamera
 python-daemon
 twilio
 unittest
-
-Linux:
-libopenjp2-7
-libtiff5
-ttf-freefont
-python3-gpiozero
-python3-openpyxl
+adafruit_ina219

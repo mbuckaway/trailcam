@@ -1,6 +1,6 @@
 {
     "camera": {
-        "type": "v4l",
+        "type": "v2l",
         "device": "/dev/video0",
         "delay": 2,
         "latitude": "43.4873066",
@@ -13,8 +13,8 @@
         "temperature":
         {
             "enabled": true,
-            "type": "bmp280",
-            "device": "1-0076",
+            "type": "MP3115A2",
+            "device": "1-0060",
             "rounding": 1
         },
         "light":
@@ -27,7 +27,7 @@
         "voltage":
         {
             "enabled": true,
-            "type": "bh1750",
+            "type": "ina219",
             "address": "0x40",
             "rounding": 1
         }
@@ -41,38 +41,12 @@
         "slowcount": 5,
         "slowtime": 0.5
     },
-    "hwmon":
+    "image":
     {
-        "shutdown_enabled": false,
-        "twilio": {
-            "enabled": true,
-            "account_sid": "ACCOUNT_SID",
-            "auth_token": "AUTH_TOKEN",
-            "phone_number": "PHONE_NUMBER"
-        },
-        "message":
-        {
-            "warning": "KW Geesecam is under voltage! Currently %%VOLTS%%V",
-            "shutdown": "KW Geesecam is dead! Currently %%VOLTS%%V. Shutting down!"
-        },
-        "smslimit": 1800,
-        "phone_numbers": [
-            "+12262345678",
-            "+‭15192345678‬"
-        ],
-        "min_voltage":
-        {
-            "warning": 10.0,
-            "shutdown": 9.1
-        },
-        "timefile": "/tmp/trailcamlastcheck.json"
-    },
-    "thingspeak":
-    {
-        "enabled": true,
-        "writekey": "WRITEKEY",
-        "channelid": 1,
-        "timeout": 15
+        "width" : 1440,
+        "height" : 810,
+        "filename": "/tmp/webcam.jpg",
+        "archive": "/tmp/archive"
     },
     "annotate":
     {
@@ -83,14 +57,8 @@
         "format_twitter": "Hydrocut Status: %%TEMP%%C %%LIGHT%%Lux (Internet by @WorldlineCanada)",
         "position": "bottom"
     },
-    "image":
-    {
-        "width" : 1440,
-        "height" : 810,
-        "filename": "/tmp/webcam.jpg"
-    },
     "ftp": {
-        "enabled": true,
+        "enabled": false,
         "server" : "servername",
         "user" : "webcam",
         "password" : "password",
@@ -104,6 +72,39 @@
         "ConsumerSecret": "CONSUMER SECRET",
         "AccessKey" : "ACCESS KEY",
         "AccessSecret": "ACCESS SECRET"
+    },
+    "thingspeak":
+    {
+        "enabled": true,
+        "writekey": "WRITEKEY",
+        "channelid": 1,
+        "timeout": 15
+    },
+    "hwmon":
+    {
+        "shutdown_enabled": false,
+        "twilio": {
+            "enabled": true,
+            "account_sid": "ACCOUNT_SID",
+            "auth_token": "AUTH_TOKEN",
+            "phone_number": "+12262345678"
+        },
+        "message":
+        {
+            "warning": "KW Geesecam is under voltage! Currently %%VOLTS%%V",
+            "shutdown": "KW Geesecam is dead! Currently %%VOLTS%%V. Shutting down!"
+        },
+        "smslimit": 1800,
+        "phone_numbers": [
+            "+12262345555",
+            "+12262345556"
+        ],
+        "min_voltage":
+        {
+            "warning": 10.0,
+            "shutdown": 9.1
+        },
+        "timefile": "/tmp/trailcamlastcheck.json"
     },
     "scheduler": 
     {

@@ -16,11 +16,11 @@
             "type": "python",
             "request": "attach",
             "port": 5678,
-            "host": "192.168.30.16",
+            "host": "192.168.30.9",
             "pathMappings": [
                 {
                     "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "."
+                    "remoteRoot": "/home/mark/src/trailcam"
                 }
             ]
         },

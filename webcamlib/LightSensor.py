@@ -1,8 +1,8 @@
-from Config import Config, ConfigTemperature
+from webcamlib.Config import Config, ConfigTemperature
 import logging
 from pathlib import PosixPath
 from abc import ABC, abstractproperty
-from Exceptions import DeviceError, ConfigError
+from webcamlib.Exceptions import DeviceError, ConfigError
 
 class AbstractLightSensor(ABC):
     """ Base class for the light sensor """
@@ -16,6 +16,21 @@ class AbstractLightSensor(ABC):
     @abstractproperty
     def bus(self):
         pass        
+
+    def dispose(self):
+        pass
+
+class NullSensor(AbstractLightSensor):
+    def __init__(self, lightsensor_config):
+        super().__init__(lightsensor_config)
+        self.property_bus = "null"
+
+    @property
+    def lightlevel(self):
+        return 0
+    @property
+    def bus(self):
+        return self.property_bus
 
 
 class BH1750Sensor(AbstractLightSensor):
@@ -48,6 +63,9 @@ class BH1750Sensor(AbstractLightSensor):
         if (not self.lightsensor_path_scale.exists() and not self.lightsensor_path_scale.is_file()):
             raise DeviceError(self.lightsensor_path_scale)
 
+    def dispose(self):
+        pass
+
     @property
     def lightlevel(self):
         with self.lightsensor_path_raw.open() as f:
@@ -70,20 +88,22 @@ class LightSensor:
         ..additional chips may be added in the future
 
         Reading pressure from a sensor that does not support it will return 0
-
-    >>> configFile = Config('config-test-bh1750.json')
-    >>> sensor = LightSensor(configFile.lightsensor)
-    >>> print(str(sensor.lightlevel))
-    100
     """
     def __init__(self, lightsensor_config):
+        self.logger = logging.getLogger('lightsensor')
         try:
-            if (lightsensor_config.sensortype.upper() == "BH1750"):
-                self.sensor = BH1750Sensor(lightsensor_config)
-            else:
-                raise ConfigError("Invalid light level sensor type: " + lightsensor_config.sensortype)
+            self.sensor = NullSensor(lightsensor_config)
+            if (lightsensor_config.enabled):
+                if (lightsensor_config.sensortype.upper() == "BH1750"):
+                    self.sensor = BH1750Sensor(lightsensor_config)
+                else:
+                    raise ConfigError("Invalid light level sensor type: " + lightsensor_config.sensortype)
         except DeviceError as e:
-            logging.error("Unable to find sensor: " + str(e.args))
+            self.logger.error("Unable to find sensor: " + str(e.args))
+            raise e
+
+    def dispose(self):
+        self.sensor.dispose()
 
     @property
     def lightlevel(self):

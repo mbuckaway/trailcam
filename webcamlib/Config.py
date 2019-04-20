@@ -1,7 +1,9 @@
 import json
 import logging
 import distutils.util
-from Exceptions import ConfigError
+from webcamlib.Exceptions import ConfigError
+
+config_logger = logging.getLogger('config')
 
 class ConfigCamera:
     """ Camera section configuration """
@@ -46,6 +48,30 @@ class ConfigCamera:
     def rotation(self):
         return self.property_rotation
 
+class ConfigSensors:
+    """ Sensor section configuration """
+
+    def __init__(self, object):
+        try:
+            self.property_temperature = ConfigTemperature(object['temperature'])
+            self.property_light = ConfigLightSensor(object['light'])
+            self.property_voltage = ConfigVoltageSensor(object['voltage'])
+        except KeyError as e:
+            raise ConfigError("Sensors Section: " + str(e.args))
+
+    @property
+    def temperature(self):
+        return self.property_temperature
+
+    @property
+    def light(self):
+        return self.property_light
+
+    @property
+    def voltage(self):
+        return self.property_voltage
+
+
 class ConfigTemperature:
     """ Sensor section configuration """
 
@@ -64,7 +90,7 @@ class ConfigTemperature:
 
     @property
     def sensortype(self):
-        """ Sensor types are mp3115a2 or BMP280 """
+        """ Sensor types are mp3115a2 or BMP280 or ds18b20"""
         return self.property_type.upper()
 
     @property
@@ -107,6 +133,39 @@ class ConfigLightSensor:
     @property
     def device(self):
         return self.property_device
+
+    @property
+    def rounding(self):
+        return self.property_rounding
+
+class ConfigVoltageSensor:
+    """ Voltage/Current Sensor section configuration """
+
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_type = object['type']
+            self.property_address = object['address']
+            # Rounding is optional. -1 means no rounding
+            try:
+                self.property_rounding = int(object['rounding'])
+            except KeyError:
+                self.property_rounding = -1
+        except KeyError as e:
+            raise ConfigError("Voltage Sensor Section: " + str(e.args))
+
+    @property
+    def sensortype(self):
+        """ Sensor types are INA219 only at this point """
+        return self.property_type.upper()
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def address(self):
+        return self.property_address
 
     @property
     def rounding(self):
@@ -215,7 +274,7 @@ class ConfigFTP:
         try:
             self.property_enabled = object['enabled']
             if (enabled == False):
-                logging.warn("FTP Disabled!")
+                config_logger.warning("FTP Disabled!")
                 self.property_enabled = False
             self.property_server = object['server']
             self.property_user = object['user']
@@ -255,7 +314,7 @@ class ConfigTwitter:
         try:
             self.property_enabled = object['enabled']
             if (enabled == False):
-                logging.warn("Twitter Disabled!")
+                config_logger.warning("Twitter Disabled!")
                 self.property_enabled = False
             self.property_consumerkey = object['ConsumerKey']
             self.property_consumersecret = object['ConsumerSecret']
@@ -284,36 +343,158 @@ class ConfigTwitter:
     def accesssecret(self):
         return self.property_accesssecret
 
-class Config:
-    """ A class to deal with loading and parsing the config file and all the options within
+class ConfigHWMon:
+    """ HWMon config section """
+    def __init__(self, object):
+        try:
+            self.property_shutdown_enabled = object['shutdown_enabled']
+            twilio_section = object['twilio']
+            self.property_twilio_enabled = twilio_section['enabled']
+            self.property_twilio_account_sid = twilio_section['account_sid']
+            self.property_twilio_auth_token = twilio_section['auth_token']
+            self.property_twilio_phone_number = twilio_section['phone_number']
 
-    >>> configFile = Config('config-sample.json')
-    >>> print(configFile.camera.cameratype)
-    pi
-    >>> print(configFile.camera.device)
-    /dev/video0
-    >>> print(configFile.camera.delay)
-    2
-    >>> print(configFile.camera.latitude)
-    43.4873066
-    >>> print(configFile.camera.longitude)
-    -80.4841633
-    >>> print(configFile.camera.elevation)
-    400
-    >>> print(configFile.temperature.enabled)
-    True
-    >>> print(configFile.lightsensor.enabled)
-    True
-    >>> print(configFile.image.width)
-    1440
-    >>> print(configFile.image.height)
-    810
-    >>> print(configFile.image.filename)
-    /home/user/webcam.jpg
-    >>> print(configFile.ftp.server)
-    servername
-    >>> print(configFile.twitter.consumersecret)
-    CONSUMER SECRET
+            message_section = object['message']
+            self.property_message_warning = message_section['warning']
+            self.property_message_shutdown = message_section['shutdown']
+
+            self.property_smslimit = object['smslimit']
+
+            # Don't bother with the phone numbers if SMS is disabled
+            if (self.property_twilio_enabled):
+                self.property_phone_numbers = object['phone_numbers']
+
+            minvoltage_section = object['min_voltage']
+            self.property_warning_voltage = minvoltage_section['warning']
+            self.property_shutdown_voltage = minvoltage_section['shutdown']
+            self.property_timefile = object['timefile']
+        except KeyError as e:
+            raise ConfigError('HWMon Section: ' + str(e.args))
+
+    @property
+    def shutdown_enabled(self):
+        return self.property_shutdown_enabled
+        
+    @property
+    def twilio_enabled(self):
+        return self.property_twilio_enabled
+
+    @property
+    def twilio_account_sid(self):
+        return self.property_twilio_account_sid
+
+    @property
+    def twilio_auth_token(self):
+        return self.property_twilio_auth_token
+
+    @property
+    def twilio_phone_number(self):
+        return self.property_twilio_phone_number
+
+    @property
+    def message_warning(self):
+        return self.property_message_warning
+
+    @property
+    def message_shutdown(self):
+        return self.property_message_shutdown
+
+    @property
+    def smslimit(self):
+        return self.property_smslimit
+
+    @property
+    def phone_numbers(self):
+        return self.property_phone_numbers
+
+    @property
+    def warning_voltage(self):
+        return self.property_warning_voltage
+
+    @property
+    def shutdown_voltage(self):
+        return self.property_shutdown_voltage
+
+    @property
+    def timefile(self):
+        return self.property_timefile
+
+class ConfigThingSpeak:
+    """ ThinkSpeak config section """
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_writekey = object['writekey']
+            self.property_channelid = object['channelid']
+            self.property_timeout = object['timeout']
+        except KeyError as e:
+            raise ConfigError('ThinkSpeak Section: ' + str(e.args))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def writekey(self):
+        return self.property_writekey
+
+    @property
+    def channelid(self):
+        return self.property_channelid
+
+    @property
+    def timeout(self):
+        return self.property_timeout
+
+class ConfigProcess:
+    """ Scheduler Process item section """
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_description = object['description']
+            self.property_count = int(object['count'])
+            self.property_functions = object['functions']
+        except KeyError as e:
+            raise ConfigError('Scheduler Process Section: ' + str(e.args))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def description(self):
+        return self.property_description
+
+    @property
+    def count(self):
+        return self.property_count
+
+    @property
+    def functions(self):
+        return self.property_functions
+
+class ConfigScheduler:
+    """ Scheduler config section """
+    def __init__(self, object):
+        try:
+            self.property_interval = int(object['interval'])
+            self.property_processes = []
+            for process in object['processes']:
+                self.property_processes.append(ConfigProcess(process))
+        except KeyError as e:
+            raise ConfigError('Scheduler Section: ' + str(e.args[0]))
+
+    @property
+    def interval(self):
+        return self.property_interval
+
+    @property
+    def processes(self):
+        return self.property_processes
+
+class Config:
+    """
+    A class to deal with loading and parsing the config file and all the options within
     """
 
     def __init__(self, filename, ftpenabled = False, twitterenabled = False):
@@ -323,26 +504,30 @@ class Config:
         # Load the sections of the config
         try:
             self.property_camera = ConfigCamera(self.config['camera'])
-            self.property_temperature = ConfigTemperature(self.config['temperature'])
-            self.property_lightsensor = ConfigLightSensor(self.config['lightsensor'])
+            self.property_sensors = ConfigSensors(self.config['sensors'])
             self.property_image = ConfigImage(self.config['image'])
             self.property_ftp = ConfigFTP(self.config['ftp'], ftpenabled)
             self.property_twitter = ConfigTwitter(self.config['twitter'], twitterenabled)
             self.property_annotate = ConfigAnnotate(self.config['annotate'])
             self.property_led = ConfigLED(self.config['led'])
-            logging.debug("Camera device: " + self.property_camera.device)
-            logging.debug("Sensor Type: " + self.property_temperature.sensortype)
-            logging.debug("Sensor Device: " + self.property_temperature.device)
-            logging.debug("Image size: " + str(self.property_image.width) + "x" + str(self.property_image.height))
-            logging.debug("Image file: " + self.property_image.filename)
-            logging.debug("Ftp Server: " + self.property_ftp.server)
-            logging.debug("Ftp User: " + self.property_ftp.user)
+            self.property_hwmon = ConfigHWMon(self.config['hwmon'])
+            self.property_thingspeak = ConfigThingSpeak(self.config['thingspeak'])
+            self.property_scheduler = ConfigScheduler(self.config['scheduler'])
+            config_logger.debug("Camera device: " + self.property_camera.device)
+            config_logger.debug("Image size: " + str(self.property_image.width) + "x" + str(self.property_image.height))
+            config_logger.debug("Image file: " + self.property_image.filename)
+            config_logger.debug("Ftp Server: " + self.property_ftp.server)
+            config_logger.debug("Ftp User: " + self.property_ftp.user)
 
         except KeyError as e:
-            logging.error("Invalid or missing key in section config: " + str(e.args))
+            config_logger.exception("Invalid or missing key in section config: %s", e)
+            raise e
         except ConfigError as e:
-            logging.error("Invalid or missing key in config: " + e.section)
+            config_logger.exception("Invalid or missing key in config: %s", e)
+            raise e
 
+    def dispose(self):
+        pass
 
     @property
     def configfile(self):
@@ -353,12 +538,8 @@ class Config:
         return self.property_camera
 
     @property
-    def temperature(self):
-        return self.property_temperature
-
-    @property
-    def lightsensor(self):
-        return self.property_lightsensor
+    def sensors(self):
+        return self.property_sensors
 
     @property
     def image(self):
@@ -380,8 +561,15 @@ class Config:
     def twitter(self):
         return self.property_twitter
 
-if __name__ == '__main__':
-  import doctest
-  doctest.testmod()
+    @property
+    def hwmon(self):
+        return self.property_hwmon
 
+    @property
+    def thingspeak(self):
+        return self.property_thingspeak
+
+    @property
+    def scheduler(self):
+        return self.property_scheduler
 

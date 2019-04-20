@@ -1,8 +1,8 @@
-from Config import Config, ConfigTemperature
+from webcamlib.Config import Config, ConfigTemperature
 import logging
 from pathlib import PosixPath
 from abc import ABC, abstractproperty
-from Exceptions import DeviceError, ConfigError
+from webcamlib.Exceptions import DeviceError, ConfigError
 
 class AbstractTemperatureSensor(ABC):
     """ Base class for the temperature sensor """
@@ -20,6 +20,23 @@ class AbstractTemperatureSensor(ABC):
     @abstractproperty
     def bus(self):
         pass        
+
+class NullSensor(AbstractTemperatureSensor):
+    def __init__(self, temperature_config):
+        super().__init__(temperature_config)
+        self.property_bus = "null"
+
+    @property
+    def temperature(self):
+        return 0
+
+    @property
+    def pressure(self):
+        return 0
+
+    @property
+    def bus(self):
+        return self.property_bus
 
 class BMP280Sensor(AbstractTemperatureSensor):
     """
@@ -186,38 +203,23 @@ class TemperatureSensor:
         MP3115A2 - temperature and pressure
 
         Reading pressure from a sensor that does not support it will return 0
-
-    >>> configFile = Config('config-test-ds18b20.json')
-    >>> sensor = TemperatureSensor(configFile.temperature)
-    >>> print(str(sensor.pressure))
-    0
-    >>> print(str(sensor.temperature))
-    20
-    >>> configFile = Config('config-test-bmp280.json')
-    >>> sensor = TemperatureSensor(configFile.temperature)
-    >>> print(str(sensor.pressure))
-    980
-    >>> print(str(sensor.temperature))
-    20
-    >>> configFile = Config('config-test-mp3115a2.json')
-    >>> sensor = TemperatureSensor(configFile.temperature)
-    >>> print(str(sensor.pressure))
-    980
-    >>> print(str(sensor.temperature))
-    20
     """
     def __init__(self, temperature_config):
         try:
-            if (temperature_config.sensortype.upper() == "DS18B20"):
-                self.sensor = DS18B20Sensor(temperature_config)
-            elif (temperature_config.sensortype.upper() == "MP3115A2"):
-                self.sensor = MP3115Sensor(temperature_config)
-            elif (temperature_config.sensortype.upper() == "BMP280"):
-                self.sensor = BMP280Sensor(temperature_config)
-            else:
-                raise ConfigError("Invalid temperature sensor type: " + temperature_config.sensortype)
+            self.sensor = NullSensor(temperature_config)
+            if (temperature_config.enabled):
+                logging.debug("Found temperature sensor: " + temperature_config.sensortype.upper())
+                if (temperature_config.sensortype.upper() == "DS18B20"):
+                    self.sensor = DS18B20Sensor(temperature_config)
+                elif (temperature_config.sensortype.upper() == "MP3115A2"):
+                    self.sensor = MP3115Sensor(temperature_config)
+                elif (temperature_config.sensortype.upper() == "BMP280"):
+                    self.sensor = BMP280Sensor(temperature_config)
+                else:
+                    raise ConfigError("Invalid temperature sensor type: " + temperature_config.sensortype)
         except DeviceError as e:
             logging.error("Unable to find sensor: " + str(e.args))
+            raise e
 
     @property
     def temperature(self):

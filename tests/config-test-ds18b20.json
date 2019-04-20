@@ -13,8 +13,8 @@
         "temperature":
         {
             "enabled": true,
-            "type": "bmp280",
-            "device": "1-0076",
+            "type": "ds18b20",
+            "device": "28-0113140e56aa",
             "rounding": 1
         },
         "light":
@@ -43,12 +43,11 @@
     },
     "hwmon":
     {
-        "shutdown_enabled": false,
         "twilio": {
             "enabled": true,
             "account_sid": "ACCOUNT_SID",
             "auth_token": "AUTH_TOKEN",
-            "phone_number": "PHONE_NUMBER"
+            "phone_number": "+12262345678"
         },
         "message":
         {
@@ -57,22 +56,17 @@
         },
         "smslimit": 1800,
         "phone_numbers": [
-            "+12262345678",
-            "+‭15192345678‬"
+            "+12262345555",
+            "+12262345556"
         ],
         "min_voltage":
         {
-            "warning": 10.0,
-            "shutdown": 9.1
+            "warning": 7.0,
+            "shutdown": 6.0,
+            "check_interval": 60
         },
+        "datafile": "/tmp/voltage.xlxs",
         "timefile": "/tmp/trailcamlastcheck.json"
-    },
-    "thingspeak":
-    {
-        "enabled": true,
-        "writekey": "WRITEKEY",
-        "channelid": 1,
-        "timeout": 15
     },
     "annotate":
     {
@@ -104,6 +98,39 @@
         "ConsumerSecret": "CONSUMER SECRET",
         "AccessKey" : "ACCESS KEY",
         "AccessSecret": "ACCESS SECRET"
+    },
+    "thingspeak":
+    {
+        "enabled": true,
+        "writekey": "WRITEKEY",
+        "channelid": 1,
+        "timeout": 15
+    },
+    "hwmon":
+    {
+        "shutdown_enabled": false,
+        "twilio": {
+            "enabled": true,
+            "account_sid": "ACCOUNT_SID",
+            "auth_token": "AUTH_TOKEN",
+            "phone_number": "+12262345678"
+        },
+        "message":
+        {
+            "warning": "KW Geesecam is under voltage! Currently %%VOLTS%%V",
+            "shutdown": "KW Geesecam is dead! Currently %%VOLTS%%V. Shutting down!"
+        },
+        "smslimit": 1800,
+        "phone_numbers": [
+            "+12262345555",
+            "+12262345556"
+        ],
+        "min_voltage":
+        {
+            "warning": 10.0,
+            "shutdown": 9.1
+        },
+        "timefile": "/tmp/trailcamlastcheck.json"
     },
     "scheduler": 
     {
