@@ -3,4 +3,4 @@ import webcamlib
 from webcamlib import cli_webcam
 
 if __name__ == '__main__':
-    cli_webcam.main("trailcam")
+    cli_webcam.main()
