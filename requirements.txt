@@ -4,4 +4,7 @@ picamera
 python-daemon
 twilio
 unittest
-adafruit_ina219
+adafruit-circuitpython-ina219
+thinkspeak
+python-daemon
+

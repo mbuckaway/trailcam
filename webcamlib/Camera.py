@@ -69,6 +69,7 @@ class Camera:
     def snapshotPiCamera(self):
         try:
             with PiCamera() as camera:
+                self.logger.debug("Taking a picture with the PI camera")
                 camera.resolution = (self.config.image.width, self.config.image.height)
                 camera.awb_mode = 'auto'
                 camera.rotation = self.config.camera.rotation
@@ -87,13 +88,13 @@ class Camera:
                         camera.exposure_mode = 'nightpreview'
                         camera.iso = 1200
                         camera.brightness = 60
-                    path = PosixPath(self.config.image.filename)
-                    # Assume jpg
-                    imagetype = "jpeg"
-                    if path.suffix.upper() == "PNG":
-                        imagetype = "png"
-                    self.blinkled()
-                    camera.capture(self.config.image.filename, format=imagetype, use_video_port=False)
+                path = PosixPath(self.config.image.filename)
+                # Assume jpg
+                imagetype = "jpeg"
+                if path.suffix.upper() == "PNG":
+                    imagetype = "png"
+                self.blinkled()
+                camera.capture(self.config.image.filename, format=imagetype, use_video_port=False)
         except Exception as e:
             self.logger.error("Camera was unable to capture an image: " + str(e.args))
         finally:
