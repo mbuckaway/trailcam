@@ -65,6 +65,11 @@ class TestConfigMethods(unittest.TestCase):
         self.assertEqual(1, len(process.functions))
         self.assertEqual("twitterupload", process.functions[0])
 
+        self.assertTrue(self.configFile.restapi.enabled)
+        self.assertEqual(1, self.configFile.restapi.camera_id)
+        self.assertEqual("http://kwgeesecam.ca", self.configFile.restapi.host)
+        self.assertEqual("API_KEY", self.configFile.restapi.api_key)
+
 if __name__ == '__main__':
     root_logger = logging.getLogger('')
     # Setup logging to the screen

@@ -86,6 +86,13 @@
         },
         "timefile": "/tmp/trailcamlastcheck.json"
     },
+    "restapi": 
+    {
+        "enabled": true,
+        "host": "http://kwgeesecam.ca",
+        "camera_id": 1,
+        "api_key": "API_KEY"
+    },
     "scheduler": 
     {
         "interval": 60,

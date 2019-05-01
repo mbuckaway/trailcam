@@ -105,6 +105,13 @@
         "AccessKey" : "ACCESS KEY",
         "AccessSecret": "ACCESS SECRET"
     },
+    "restapi": 
+    {
+        "enabled": true,
+        "host": "http://kwgeesecam.ca",
+        "camera_id": 1,
+        "api_key": "API_KEY4"
+    },
     "scheduler": 
     {
         "interval": 60,

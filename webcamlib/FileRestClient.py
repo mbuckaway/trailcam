@@ -1,0 +1,68 @@
+import json
+from urllib import request, parse, error
+import logging
+
+class FileRestClient:
+    """ 
+    Rest client to notify the database server of a new file to upload
+    """
+    def __init__(self, config):
+        self.logger = logging.getLogger('filerestclient')
+        self.config = config
+
+    def _encodedata(self, postdata):
+        data = json.dumps(postdata)
+        data = str(data)
+        data = data.encode('utf-8')
+        return data
+
+    def new_file(self, filename, directory):
+        postdata = {
+            "camera_id": self.config.restapi.camera_id,
+            "filename": filename,
+            "directory": directory,
+            "api_key": self.config.restapi.api_key
+        }
+        data = self._encodedata(postdata)
+
+        req =  request.Request(self.config.restapi.host + '/api/photos/create.php', data=data)
+        req.add_header('Content-Type', 'application/json')
+
+        result = { "success": False }
+        try:
+            with request.urlopen(req) as response:
+                datareturned = response.read().decode('utf-8')
+            result = json.loads(datareturned)
+            self.logger.info("Added new file to website {}{}".format(filename, directory))
+        except error.HTTPError as e:
+            self.logger.exception("Http error: %s", e)
+        except error.URLError as e:    
+            self.logger.exception("Http error: %s", e)
+        except json.decoder.JSONDecodeError as e:
+            self.logger.exception("JSON error: %s", e)
+        return result
+
+    def filelist(self):
+        postdata = {
+            "camera_id": self.config.filerest.camera_id,
+            "count": 8,
+            "api_key": self.config.filerest.api_key
+        }
+        data = self._encodedata(postdata)
+
+        req =  request.Request(self.config.filerest.host + '/api/photos/last.php', data=data)
+        req.add_header('Content-Type', 'application/json')
+
+        result = { "success": False }
+        try:
+            with request.urlopen(req) as response:
+                datareturned = response.read().decode('utf-8')
+            result = json.loads(datareturned)
+        except error.HTTPError as e:
+            self.logger.exception("Http error: %s", e)
+        except error.URLError as e:    
+            self.logger.exception("Http error: %s", e)
+        except json.decoder.JSONDecodeError as e:
+            self.logger.exception("JSON error: %s", e)
+        return result
+

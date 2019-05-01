@@ -492,6 +492,34 @@ class ConfigScheduler:
     def processes(self):
         return self.property_processes
 
+class ConfigRestAPI:
+    """ RestAPI config section """
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_camera_id = int(object['camera_id'])
+            self.property_host = object['host']
+            self.property_api_key = object['api_key']
+        except KeyError as e:
+            raise ConfigError('RestAPI Section: ' + str(e.args[0]))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def camera_id(self):
+        return self.property_camera_id
+
+    @property
+    def host(self):
+        return self.property_host
+
+    @property
+    def api_key(self):
+        return self.property_api_key
+
+
 class Config:
     """
     A class to deal with loading and parsing the config file and all the options within
@@ -513,6 +541,7 @@ class Config:
             self.property_hwmon = ConfigHWMon(self.config['hwmon'])
             self.property_thingspeak = ConfigThingSpeak(self.config['thingspeak'])
             self.property_scheduler = ConfigScheduler(self.config['scheduler'])
+            self.property_restapi = ConfigRestAPI(self.config['restapi'])
             config_logger.debug("Camera device: " + self.property_camera.device)
             config_logger.debug("Image size: " + str(self.property_image.width) + "x" + str(self.property_image.height))
             config_logger.debug("Image file: " + self.property_image.filename)
@@ -573,3 +602,6 @@ class Config:
     def scheduler(self):
         return self.property_scheduler
 
+    @property
+    def restapi(self):
+        return self.property_restapi
