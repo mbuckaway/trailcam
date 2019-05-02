@@ -88,8 +88,7 @@
         "server" : "servername",
         "user" : "webcam",
         "password" : "password",
-        "remotefile": "webcam/webcam.jpg",
-        "archive_dir": "archive"
+        "archive_dir": "images/webcam"
     },
     "twitter":
     {

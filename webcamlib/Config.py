@@ -279,7 +279,6 @@ class ConfigFTP:
             self.property_server = object['server']
             self.property_user = object['user']
             self.property_password = object['password']
-            self.property_remotefile = object['remotefile']
             self.property_archivedir = object['archive_dir']
         except KeyError as e:
             raise ConfigError('FTP Section: ' + str(e.args))
@@ -299,10 +298,6 @@ class ConfigFTP:
     @property
     def password(self):
         return self.property_password
-
-    @property
-    def remotefile(self):
-        return self.property_remotefile
 
     @property
     def archive_dir(self):

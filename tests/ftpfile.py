@@ -1,6 +1,7 @@
 import unittest
 from webcamlib.Config import Config
 from webcamlib.FtpFile import FtpFile
+from webcamlib.Scheduler import SchedulerData
 import logging
 
 """
@@ -8,7 +9,8 @@ import logging
 """
 class TestFtpFileMethods(unittest.TestCase):
     def setUp(self):
-        self.configFile = Config('tests/config-test.json', True, False)
+        self.configFile = Config('../config.json', True, False)
+        self.data = SchedulerData()
 
     def tearDown(self):
         self.configFile.dispose()
@@ -16,10 +18,11 @@ class TestFtpFileMethods(unittest.TestCase):
     def runTest(self):
         success = True
         try:
-            ftpfile = FtpFile(self.configFile.ftp, self.configFile.image)
+            ftpfile = FtpFile(self.configFile, self.data)
             ftpfile.sendfile()
-        except Exception as e:
+        except Exception:
             success = False
+            print("Test failed with error: {}".format(self.data.lasterror))
         self.assertTrue(success)
 
 if __name__ == '__main__':

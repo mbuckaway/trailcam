@@ -2,7 +2,7 @@ import ftplib
 import logging
 from pathlib import PosixPath
 import datetime
-
+from webcamlib.FileRestClient import FileRestClient
 class FtpFile:
     """ 
     Ftp File uploads the webcam image to the remote directory, after archiving the old image
@@ -32,32 +32,41 @@ class FtpFile:
 
     def sendfile(self):
         if (self.config.ftp.enabled):
-            self.logger.info("Uploading file to " + self.config.ftp.server + " as " + self.config.ftp.remotefile)
+            self.logger.info("Uploading file to " + self.config.ftp.server)
             try:
                 now = datetime.datetime.now()
-                remotepath = PosixPath(self.config.ftp.remotefile)
-                archivepath = PosixPath(self.config.ftp.archive_dir).joinpath(now.strftime("%Y%m/%d")).as_posix()
-                archivefilename =  PosixPath(archivepath).joinpath(remotepath.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + remotepath.suffix).as_posix()
-                self.logger.debug("Remote file: " + self.config.ftp.remotefile)
-                self.logger.debug("Archive path: " + archivepath)
-                self.logger.debug("Archive file: " + archivefilename)
+                localfileobj = PosixPath(self.config.image.filename)
+                remotepathobj = PosixPath(self.config.ftp.archive_dir).joinpath(now.strftime("%Y%m/%d"))
+                remotepath = remotepathobj.as_posix()
+                remotefilename =  localfileobj.stem + "-" + now.strftime("%Y%m%d-%H%M%S") + localfileobj.suffix
+                remotefullpath = PosixPath(remotepath).joinpath(remotefilename).as_posix()
+                self.logger.debug("Remote path: " + remotepath)
+                self.logger.debug("Remote file: " + remotefilename)
+                self.logger.debug("Remote fullpath: " + remotefullpath)
                 self.session = ftplib.FTP(self.config.ftp.server,self.config.ftp.user,self.config.ftp.password)
                 # make a new directory and don't complain if it's already there
-                self.logger.info("Storing old image in " + archivefilename)
+                self.logger.info("Storing image in " + remotefullpath)
                 try:
-                    self.ftpmkdir(archivepath)
-                    self.logger.debug("Renaming " + self.config.ftp.remotefile + " to " + archivefilename)
-                    self.session.rename(self.config.ftp.remotefile, archivefilename)
+                    self.ftpmkdir(remotepath)
                 except Exception as e:
-                    self.logger.error("Error archiving file: " + str(e.args))
-                    self.data.lasterror = "Archiving file failed"
+                    self.logger.error("Error creating directory file: " + str(e.args))
+                    self.data.lasterror = "creating directory failed"
 
                 photo = open(self.config.image.filename,'rb')                  # file to send
-                self.session.storbinary('STOR ' + self.config.ftp.remotefile, photo)     # send the file
+                self.session.storbinary('STOR ' + remotefullpath, photo)     # send the file
                 photo.close()                                    # close file and FTP
                 self.session.quit()
                 self.session.close()
                 self.logger.info("Upload completed successfully.")
+
+                # Update remote database
+                if (self.config.restapi.enabled):
+                    restclient = FileRestClient(self.config)
+                    restclient.new_file(remotefilename, remotepath, self.data.annotation_photo)
+                    self.logger.info("Updated website successfully.")
+                else:
+                    self.logger.warn("Updating website disabled.")
+                
             except NameError as e:
                 self.logger.exception('Failed to FTP file: NameError in script: %s', e)
                 self.data.lasterror = "FTP file failed"
