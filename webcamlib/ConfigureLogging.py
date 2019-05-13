@@ -1,5 +1,5 @@
 import logging
-import logging.config
+from logging.config import dictConfig
 import logging.handlers
 import sys
 from os.path import expanduser, expandvars
@@ -48,7 +48,7 @@ def logging_setup(path: str = None, log_level: str = 'INFO', append: bool = True
     if path:
         handlers['file'] = {
             'class': 'logging.handlers.RotatingFileHandler',
-            'maxBytes': 500000,
+            'maxBytes': 5000,
             'backupCount': 5,
             'formatter': 'simple',
             'filename': expandvars(expanduser(path)),
