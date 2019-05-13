@@ -6,16 +6,17 @@ from webcamlib.ConfigureLogging import logging_setup
 
 
 class myThread (threading.Thread):
-    def __init__(self, threadID, name):
+    def __init__(self, threadID, name, delay):
         threading.Thread.__init__(self)
         self.logger = logging.getLogger("test-{}-{}".format(name, threadID))
         self.threadID = threadID
         self.name = name
+        self.delay = delay
     def run(self):
         self.logger.info("Starting " + self.name)
         for item in range(100000):
             self.logger.info("Test line {}".format(item))
-            time.sleep(.1)
+            time.sleep(self.delay)
         self.logger.info("Exiting " + self.name)
 
 """
@@ -30,9 +31,9 @@ def main():
     threads = []
 
     # Create new threads
-    thread1 = myThread(1, "Thread-1")
-    thread2 = myThread(2, "Thread-2")
-    thread3 = myThread(3, "Thread-3")
+    thread1 = myThread(1, "Thread-1", 0.1)
+    thread2 = myThread(2, "Thread-2", 0.05)
+    thread3 = myThread(3, "Thread-3", 0.2)
 
     # Start new Threads
     thread1.start()

@@ -48,7 +48,7 @@ def logging_setup(path: str = None, log_level: str = 'INFO', append: bool = True
     if path:
         handlers['file'] = {
             'class': 'logging.handlers.RotatingFileHandler',
-            'maxBytes': 5000,
+            'maxBytes': 250000,
             'backupCount': 5,
             'formatter': 'simple',
             'filename': expandvars(expanduser(path)),

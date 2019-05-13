@@ -5,6 +5,7 @@ __pycache__/
 tests/__pycache__/
 webcamlib/__pycache__/
 *.log
+*.log.*
 sendsms.py
 TrailCam.egg-info/
 build/
