@@ -313,20 +313,23 @@ class Scheduler:
 
     def photo(self):
         # Check if the light sensor is enabled, and the light level is too low. if so, no photo.
-        if ((not self.config.sensors.light.enabled) or (self.config.sensors.light.enabled and self.data.light>100)):
+        if ((not self.config.sensors.light.enabled) or (self.config.sensors.light.enabled and self.data.light>30)):
             camera = Camera(self.config, self.data)
             camera.SnapPhoto()
             camera.AnnotateImage()
         else:
-            self.logger.debug("Skipping photo due to low light level")
+            self.logger.warn("Skipping photo due to low light level")
 
     def ftpupload(self):
         ftpfile = FtpFile(self.config, self.data)
         ftpfile.sendfile()
 
     def twitterupload(self):
-        twitterpost = TwitterPost(self.config, self.data)
-        twitterpost.post()
+        if ((not self.config.sensors.light.enabled) or (self.config.sensors.light.enabled and self.data.light>30)):
+            twitterpost = TwitterPost(self.config, self.data)
+            twitterpost.post()
+        else:
+            self.logger.warn("Skipping twitter due to low light level")
 
 if __name__ == '__main__':
     # Setup logging to the screen only for testing
