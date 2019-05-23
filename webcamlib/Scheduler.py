@@ -312,9 +312,13 @@ class Scheduler:
         annotate.Annotate()
 
     def photo(self):
-        camera = Camera(self.config, self.data)
-        camera.SnapPhoto()
-        camera.AnnotateImage()
+        # Check if the light sensor is enabled, and the light level is too low. if so, no photo.
+        if ((not self.config.sensors.light.enabled) or (self.config.sensors.light.enabled and self.data.light>100)):
+            camera = Camera(self.config, self.data)
+            camera.SnapPhoto()
+            camera.AnnotateImage()
+        else:
+            self.logger.debug("Skipping photo due to low light level")
 
     def ftpupload(self):
         ftpfile = FtpFile(self.config, self.data)
