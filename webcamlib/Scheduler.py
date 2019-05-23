@@ -321,8 +321,11 @@ class Scheduler:
             self.logger.warn("Skipping photo due to low light level")
 
     def ftpupload(self):
-        ftpfile = FtpFile(self.config, self.data)
-        ftpfile.sendfile()
+        if ((not self.config.sensors.light.enabled) or (self.config.sensors.light.enabled and self.data.light>30)):
+            ftpfile = FtpFile(self.config, self.data)
+            ftpfile.sendfile()
+        else:
+            self.logger.warn("Skipping photo due to low light level")
 
     def twitterupload(self):
         if ((not self.config.sensors.light.enabled) or (self.config.sensors.light.enabled and self.data.light>30)):
