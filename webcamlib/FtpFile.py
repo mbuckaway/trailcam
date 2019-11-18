@@ -28,7 +28,8 @@ class FtpFile:
             root = newroot
 
     def dispose(self):
-        pass
+        if (self.session):
+            self.session.close()
 
     def sendfile(self):
         if (self.config.ftp.enabled):
