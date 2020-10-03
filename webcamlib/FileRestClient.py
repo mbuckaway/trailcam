@@ -1,5 +1,5 @@
-import json
-from urllib import request, parse, error
+import ujson as json
+from urllib import urequest
 import logging
 
 class FileRestClient:
@@ -26,18 +26,18 @@ class FileRestClient:
         }
         data = self._encodedata(postdata)
 
-        req =  request.Request(self.config.restapi.host + '/api/photos/create.php', data=data)
+        req =  urequest.Request(self.config.restapi.host + '/api/photos/create.php', data=data)
         req.add_header('Content-Type', 'application/json')
 
         result = { "success": False }
         try:
-            with request.urlopen(req) as response:
+            with urequest.urlopen(req) as response:
                 datareturned = response.read().decode('utf-8')
             result = json.loads(datareturned)
             self.logger.info("Added new file to website {}/{}".format(directory, filename))
-        except error.HTTPError as e:
-            self.logger.exception("Http error: %s", e)
-        except error.URLError as e:    
+        except ValueError as e:
+            self.logger.exception("Value error: %s", e)
+        except OSError as e:    
             self.logger.exception("Http error: %s", e)
         except json.decoder.JSONDecodeError as e:
             self.logger.exception("JSON error: %s", e)
@@ -51,17 +51,17 @@ class FileRestClient:
         }
         data = self._encodedata(postdata)
 
-        req =  request.Request(self.config.restapi.host + '/api/photos/last.php', data=data)
+        req =  urequest.Request(self.config.restapi.host + '/api/photos/last.php', data=data)
         req.add_header('Content-Type', 'application/json')
 
         result = { "success": False }
         try:
-            with request.urlopen(req) as response:
+            with urequest.urlopen(req) as response:
                 datareturned = response.read().decode('utf-8')
             result = json.loads(datareturned)
-        except error.HTTPError as e:
-            self.logger.exception("Http error: %s", e)
-        except error.URLError as e:    
+        except ValueError as e:
+            self.logger.exception("Value error: %s", e)
+        except OSError as e:    
             self.logger.exception("Http error: %s", e)
         except json.decoder.JSONDecodeError as e:
             self.logger.exception("JSON error: %s", e)
@@ -75,17 +75,17 @@ class FileRestClient:
         }
         data = self._encodedata(postdata)
 
-        req =  request.Request(self.config.restapi.host + '/api/photos/deletebyname.php', data=data)
+        req =  urequest.Request(self.config.restapi.host + '/api/photos/deletebyname.php', data=data)
         req.add_header('Content-Type', 'application/json')
 
         result = { "success": False }
         try:
-            with request.urlopen(req) as response:
+            with urequest.urlopen(req) as response:
                 datareturned = response.read().decode('utf-8')
             result = json.loads(datareturned)
-        except error.HTTPError as e:
-            self.logger.exception("Http error: %s", e)
-        except error.URLError as e:    
+        except ValueError as e:
+            self.logger.exception("Value error: %s", e)
+        except OSError as e:    
             self.logger.exception("Http error: %s", e)
         except json.decoder.JSONDecodeError as e:
             self.logger.exception("JSON error: %s", e)

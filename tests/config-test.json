@@ -33,14 +33,15 @@
             "rounding": 1
         }
     },
-    "led":
+    "ledred":
     {
         "enabled": true,
-        "gpiopin": 17,
-        "fasttime": 0.2,
-        "fastcount": 5,
-        "slowcount": 5,
-        "slowtime": 0.5
+        "gpiopin": 17
+    },
+    "ledgreen":
+    {
+        "enabled": false,
+        "gpiopin": 18
     },
     "hwmon":
     {
@@ -111,6 +112,11 @@
         "host": "http://kwgeesecam.ca",
         "camera_id": 1,
         "api_key": "API_KEY"
+    },
+    "trailapi": 
+    {
+        "enabled": true,
+        "host": "https://api.trailstatusapp.com/status?trailId=instagram%7C17841402338843416%7Cdefault"
     },
     "scheduler": 
     {

@@ -6,7 +6,6 @@ from webcamlib.Exceptions import ConfigError, DeviceError
 from webcamlib.Config import Config
 from webcamlib.TemperatureSensor import TemperatureSensor
 from webcamlib.LightSensor import LightSensor
-from webcamlib.Annotate import Annotate
 from webcamlib.Camera import Camera
 from webcamlib.FtpFile import FtpFile
 from webcamlib.TwitterPost import TwitterPost

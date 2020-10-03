@@ -1,23 +1,18 @@
 from webcamlib.Config import Config, ConfigTemperature
 import logging
-from pathlib import PosixPath
-from abc import ABC, abstractproperty
 from webcamlib.Exceptions import DeviceError, ConfigError
 
-class AbstractTemperatureSensor(ABC):
+class AbstractTemperatureSensor():
     """ Base class for the temperature sensor """
     def __init__(self, temperature_config):
         self.property_sensor_config = temperature_config
 
-    @abstractproperty
     def temperature(self):
         pass
 
-    @abstractproperty
     def pressure(self):
         pass        
 
-    @abstractproperty
     def bus(self):
         pass        
 
@@ -61,9 +56,9 @@ class BMP280Sensor(AbstractTemperatureSensor):
     def __init__(self, temperature_config):
         super().__init__(temperature_config)
         self.property_bus = "i2c"
-        devicepath = PosixPath("/sys/bus/i2c/devices").joinpath(temperature_config.device).joinpath("iio:device0")
-        self.temperature_path = PosixPath(devicepath.joinpath("in_temp_input"))
-        self.pressure_path = PosixPath(devicepath.joinpath("in_pressure_input"))
+        devicepath = "/sys/bus/i2c/devices/" + temperature_config.device + "/iio:device0/"
+        self.temperature_path = devicepath + "in_temp_input"
+        self.pressure_path = devicepath + "in_pressure_input"
         # Make sure they exist
         if (not self.temperature_path.exists() and not self.temperature_path.is_file()):
             raise DeviceError(self.temperature_path)
@@ -233,7 +228,3 @@ class TemperatureSensor:
     def bus(self):
         return self.sensor.bus
 
-
-if __name__ == '__main__':
-  import doctest
-  doctest.testmod()

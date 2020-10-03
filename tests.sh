@@ -1,7 +1,6 @@
 #!/bin/bash
 pushd tests
-export PYTHONPATH=..
-python3 test-config.py
-#python3 test-ftpfile.py
+export MICROPYPATH="~/.micropython/lib:.."
+micropython test-config.py
 popd
 

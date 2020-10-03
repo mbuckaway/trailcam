@@ -1,26 +1,21 @@
 from webcamlib.Config import Config, ConfigTemperature
 import logging
-from pathlib import PosixPath
-from abc import ABC, abstractproperty
 import board
 import busio
 import adafruit_ina219
 from webcamlib.Exceptions import DeviceError, ConfigError
 
-class AbstractVoltageSensor(ABC):
+class AbstractVoltageSensor():
     """ Base class for the Voltage/Current sensor """
     def __init__(self, voltagesensor_config):
         self.property_sensor_config = voltagesensor_config
 
-    @abstractproperty
     def voltage(self):
         pass
 
-    @abstractproperty
     def current(self):
         pass
 
-    @abstractproperty
     def bus(self):
         pass        
 
@@ -111,7 +106,3 @@ class VoltageSensor:
     @property
     def bus(self):
         return self.sensor.bus
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

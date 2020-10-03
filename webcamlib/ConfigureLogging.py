@@ -1,8 +1,7 @@
 import logging
-from logging.config import dictConfig
-import logging.handlers
+from logging.handlers import RotatingFileHandler
 import sys
-from os.path import expanduser, expandvars
+from os.path import expanduser
 
 """
 Code was borrowed from the configure_logging code. We update it to shorten the name of the logger, and use the
@@ -43,38 +42,11 @@ def logging_setup(path: str = None, log_level: str = 'INFO', append: bool = True
     if not path and not stdout:
         raise ValueError('No place to send logs to: path is empty and stdout is false.')
 
-    handlers = {}
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    if (stdout):
+        root_logger.handlers.clear()
+    rfh = RotatingFileHandler(path, 100000, 3)
+    root_logger.addHandler(rfh)
 
-    if path:
-        handlers['file'] = {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'maxBytes': 250000,
-            'backupCount': 5,
-            'formatter': 'simple',
-            'filename': expandvars(expanduser(path)),
-            'encoding': 'utf8',
-            'mode': 'a' if append else 'w',
-        }
-
-    if stdout:
-        handlers['stdout'] = {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-            'stream': sys.stdout  # stderr will be used if not specified
-        }
-
-    config = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'simple': {
-                'format': "[%(asctime)s] [%(name)-15.15s] [%(levelname)-7.7s] %(message)s",
-                'datefmt': "%Y-%m-%d %H:%M:%S"
-            }
-        },
-        'handlers': handlers,
-        'root': {'level': log_level, 'handlers': list(handlers.keys())}
-    }
-
-    logging.config.dictConfig(config)
     _log_exceptions_in_root_logger()

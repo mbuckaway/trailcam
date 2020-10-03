@@ -1,6 +1,5 @@
 from webcamlib.Config import Config, ConfigScheduler
 from webcamlib.Exceptions import InvalidFunctionError
-from webcamlib.Annotate import Annotate
 from webcamlib.TemperatureSensor import TemperatureSensor
 from webcamlib.VoltageSensor import VoltageSensor
 from webcamlib.LightSensor import LightSensor
@@ -65,8 +64,6 @@ class SchedulerData:
         self.property_voltage = 0.0
         self.property_current = 0.0
         self.property_light = 400
-        self.property_annotation_photo = "This is a test"
-        self.property_annotation_twitter = "This is a test"
         self.property_error = []
 
     @property
@@ -110,22 +107,6 @@ class SchedulerData:
         self.property_light = value
 
     @property
-    def annotation_photo(self):
-        return self.property_annotation_photo
-
-    @annotation_photo.setter
-    def annotation_photo(self, value):
-        self.property_annotation_photo = value
-
-    @property
-    def annotation_twitter(self):
-        return self.property_annotation_twitter
-
-    @annotation_twitter.setter
-    def annotation_twitter(self, value):
-        self.property_annotation_twitter = value
-
-    @property
     def haserror(self):
         return len(self.property_error)>0
 
@@ -156,7 +137,6 @@ class Scheduler:
             'sensors': self.sensors,
             'senddata': self.senddata,
             'checkvalues': self.checkvalues,
-            'annotate': self.annotate,
             'photo': self.photo,
             'ftpupload': self.ftpupload,
             'twitterupload': self.twitterupload
@@ -307,16 +287,11 @@ class Scheduler:
         else:
             self.logger.debug("Voltage values acceptable")
 
-    def annotate(self):
-        annotate = Annotate(self.config.annotate, self.data)
-        annotate.Annotate()
-
     def photo(self):
         # Check if the light sensor is enabled, and the light level is too low. if so, no photo.
         if ((not self.config.sensors.light.enabled) or (self.config.sensors.light.enabled and self.data.light>30)):
             camera = Camera(self.config, self.data)
             camera.SnapPhoto()
-            camera.AnnotateImage()
         else:
             self.logger.warn("Skipping photo due to low light level")
 

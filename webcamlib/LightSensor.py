@@ -1,19 +1,15 @@
 from webcamlib.Config import Config, ConfigTemperature
 import logging
-from pathlib import PosixPath
-from abc import ABC, abstractproperty
 from webcamlib.Exceptions import DeviceError, ConfigError
 
-class AbstractLightSensor(ABC):
+class AbstractLightSensor:
     """ Base class for the light sensor """
     def __init__(self, lightsensor_config):
         self.property_sensor_config = lightsensor_config
 
-    @abstractproperty
     def lightlevel(self):
         pass
 
-    @abstractproperty
     def bus(self):
         pass        
 
@@ -54,9 +50,9 @@ class BH1750Sensor(AbstractLightSensor):
     def __init__(self, lightsensor_config):
         super().__init__(lightsensor_config)
         self.property_bus = "i2c"
-        devicepath = PosixPath("/sys/bus/i2c/devices").joinpath(lightsensor_config.device).joinpath("iio:device0")
-        self.lightsensor_path_raw = PosixPath(devicepath.joinpath("in_illuminance_raw"))
-        self.lightsensor_path_scale = PosixPath(devicepath.joinpath("in_illuminance_scale"))
+        devicepath = "/sys/bus/i2c/devices/" + lightsensor_config.device + "/" + "iio:device0/"
+        self.lightsensor_path_raw = devicepath + "in_illuminance_raw"
+        self.lightsensor_path_scale = devicepath + "in_illuminance_scale"
         # Make sure they exist
         if (not self.lightsensor_path_raw.exists() and not self.lightsensor_path_raw.is_file()):
             raise DeviceError(self.lightsensor_path_raw)
@@ -112,7 +108,3 @@ class LightSensor:
     @property
     def bus(self):
         return self.sensor.bus
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
