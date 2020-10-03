@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='TrailCam',
-        version='1.02',
+        version='1.3',
         description='Webcam Library with FTP and Twitter',
         author='Mark Buckaway',
         author_email='mark@buckaway.ca',

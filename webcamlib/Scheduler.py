@@ -9,6 +9,7 @@ from webcamlib.SendAlert import SendAlert
 from webcamlib.Camera import Camera
 from webcamlib.FtpFile import FtpFile
 from webcamlib.TwitterPost import TwitterPost
+from webcamlib.TrailRestClient import TrailRestClient
 from gpiozero import LED
 
 import logging
@@ -168,6 +169,13 @@ class Scheduler:
             for n in dir(signal) if n.startswith('SIG') and '_' not in n )
 
         self.processes = []
+        self.ledred = None
+        if self.config.ledred.enabled:
+            self.ledred = LED(self.config.ledred.gpiopin)
+        self.ledgreen = None
+        if self.config.ledgreen.enabled:
+             self.ledgreen = LED(self.config.ledgreen.gpiopin)
+
         # Calculate the number of ticks until the next run of
         # each process based on the configuration
         self.ticksperhour = int(3600/self.config.scheduler.interval)
@@ -338,28 +346,31 @@ class Scheduler:
             self.logger.warn("Skipping twitter due to low light level")
 
     def trailstatus(self):
-        self.logger.info("Getting trail status...")
+        self.logger.debug("Getting trail status...")
         restclient = TrailRestClient(self.config)
         isopen = True
         try:
             isopen = restclient.status()
             if isopen:
-                self.logger.info("Trails are open")
+                self.logger.warn("Trails are open")
             else:
-                self.logger.info("Trails are closed")
-                
+                self.logger.warn("Trails are closed")
             if self.config.ledred.enabled:
-                ledred = LED(self.config.ledred.gpiopin)
                 if isopen:
-                    ledred.off()
+                    self.logger.warn("Red led is off")
+                    self.ledred.off()
                 else:
-                    ledred.on()
+                    self.logger.warn("Red led is on")
+                    self.ledred.on()
+            else:
+                self.logger.warn("Red led is disabled")
             if self.config.ledgreen.enabled:
-                ledgreen = LED(self.config.ledgreen.gpiopin)
                 if isopen:
-                    ledgreen.off()
+                    self.ledgreen.off()
                 else:
-                    ledgreen.on()
+                    self.ledgreen.on()
+            else:
+                self.logger.warn("Green led is disabled")
             
         except Exception as e:
             self.logger.error("Unable to update trail status: %s", str(e))
