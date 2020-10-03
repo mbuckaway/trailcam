@@ -366,9 +366,11 @@ class Scheduler:
                 self.logger.warn("Red led is disabled")
             if self.config.ledgreen.enabled:
                 if isopen:
-                    self.ledgreen.off()
-                else:
+                    self.logger.warn("Green led is on")
                     self.ledgreen.on()
+                else:
+                    self.logger.warn("Green led is off")
+                    self.ledgreen.off()
             else:
                 self.logger.warn("Green led is disabled")
             
