@@ -1,6 +1,5 @@
 import json
 import logging
-import distutils.util
 from webcamlib.Exceptions import ConfigError
 
 config_logger = logging.getLogger('config')
@@ -236,10 +235,6 @@ class ConfigLED:
         try:
             self.property_enabled = object['enabled']
             self.property_gpiopin = int(object['gpiopin'])
-            self.property_fasttime = object['fasttime']
-            self.property_fastcount = object['fastcount']
-            self.property_slowtime = object['slowtime']
-            self.property_slowcount = object['slowcount']
         except KeyError as e:
             raise ConfigError('LED Section: ' + str(e.args))
 
@@ -250,22 +245,6 @@ class ConfigLED:
     @property
     def gpiopin(self):
         return self.property_gpiopin
-
-    @property
-    def fasttime(self):
-        return self.property_fasttime
-
-    @property
-    def fastcount(self):
-        return self.property_fastcount
-
-    @property
-    def slowtime(self):
-        return self.property_slowtime
-
-    @property
-    def slowcount(self):
-        return self.property_slowcount
 
 
 class ConfigFTP:
@@ -514,6 +493,22 @@ class ConfigRestAPI:
     def api_key(self):
         return self.property_api_key
 
+class ConfigTrailRestAPI:
+    """ Trail RestAPI config section """
+    def __init__(self, object):
+        try:
+            self.property_enabled = object['enabled']
+            self.property_host = object['host']
+        except KeyError as e:
+            raise ConfigError('RestAPI Section: ' + str(e.args[0]))
+
+    @property
+    def enabled(self):
+        return self.property_enabled
+
+    @property
+    def host(self):
+        return self.property_host
 
 class Config:
     """
@@ -532,11 +527,13 @@ class Config:
             self.property_ftp = ConfigFTP(self.config['ftp'], ftpenabled)
             self.property_twitter = ConfigTwitter(self.config['twitter'], twitterenabled)
             self.property_annotate = ConfigAnnotate(self.config['annotate'])
-            self.property_led = ConfigLED(self.config['led'])
+            self.property_ledgreen = ConfigLED(self.config['ledgreen'])
+            self.property_ledred = ConfigLED(self.config['ledred'])
             self.property_hwmon = ConfigHWMon(self.config['hwmon'])
             self.property_thingspeak = ConfigThingSpeak(self.config['thingspeak'])
             self.property_scheduler = ConfigScheduler(self.config['scheduler'])
             self.property_restapi = ConfigRestAPI(self.config['restapi'])
+            self.property_trailapi = ConfigTrailRestAPI(self.config['trailapi'])
             config_logger.debug("Camera device: " + self.property_camera.device)
             config_logger.debug("Image size: " + str(self.property_image.width) + "x" + str(self.property_image.height))
             config_logger.debug("Image file: " + self.property_image.filename)
@@ -574,8 +571,12 @@ class Config:
         return self.property_annotate
 
     @property
-    def led(self):
-        return self.property_led
+    def ledred(self):
+        return self.property_ledred
+
+    @property
+    def ledgreen(self):
+        return self.property_ledgreen
 
     @property
     def ftp(self):
@@ -600,3 +601,7 @@ class Config:
     @property
     def restapi(self):
         return self.property_restapi
+
+    @property
+    def trailapi(self):
+        return self.property_trailapi

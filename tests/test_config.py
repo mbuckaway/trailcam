@@ -70,6 +70,9 @@ class TestConfigMethods(unittest.TestCase):
         self.assertEqual("http://kwgeesecam.ca", self.configFile.restapi.host)
         self.assertEqual("API_KEY", self.configFile.restapi.api_key)
 
+        self.assertTrue(self.configFile.trailapi.enabled)
+        self.assertEqual("https://api.trailstatusapp.com/status?trailId=instagram%7C17841402338843416%7Cdefault", self.configFile.trailapi.host)
+
 if __name__ == '__main__':
     root_logger = logging.getLogger('')
     # Setup logging to the screen

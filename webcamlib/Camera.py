@@ -6,21 +6,19 @@ import logging
 import ephem
 import datetime
 import math
-from gpiozero import LED
 from pathlib import PosixPath
 import select
 import time
 
 class Camera:
     """
-    Class to represent the supported cameras, flash the led if enabled, and take a photo
+    Class to represent the supported cameras, and take a photo
     done
     """
     def __init__(self, config, data):
         self.logger = logging.getLogger('camera')
         self.config = config
         self.data = data
-        self.led = LED(self.config.led.gpiopin)
         fontpath = PosixPath(config.annotate.font)
         if (not fontpath.exists()):
             self.logger.error("Font path " + config.annotate.font + " does not exist. Annotation disabled")
@@ -36,19 +34,6 @@ class Camera:
         else:    
             self.logger.debug("Using USB camera")
             self.snapshotv4l()
-
-
-    def blinkled(self):
-        if (self.config.led.enabled):
-            self.logger.debug("Flashing Indicator Led")
-            self.led.blink(self.config.led.slowtime, self.config.led.slowtime, self.config.led.slowcount, False)
-            self.led.blink(self.config.led.fasttime, self.config.led.fasttime, self.config.led.fastcount, False)
-            self.led.on()
-
-    def ledoff(self):
-        if (self.config.led.enabled):
-            self.logger.debug("Indicator Led off")
-            self.led.off()
 
     def isdaytime(self):
         sun = ephem.Sun()
@@ -93,12 +78,9 @@ class Camera:
                 imagetype = "jpeg"
                 if path.suffix.upper() == "PNG":
                     imagetype = "png"
-                self.blinkled()
                 camera.capture(self.config.image.filename, format=imagetype, use_video_port=False)
         except Exception as e:
             self.logger.error("Camera was unable to capture an image: " + str(e.args))
-        finally:
-            self.ledoff()
 
     def snapshotv4l(self):
         self.logger.info("Taking photo from device: " + self.config.camera.device)
@@ -121,8 +103,6 @@ class Camera:
             image.save(self.config.image.filename)
         except Exception as e:
             self.logger.error("Error taking v4l image: " + str(e.args))
-        finally:
-            self.ledoff()
 
     def AnnotateImage(self):
         if (self.config.annotate.enabled == True):
@@ -137,4 +117,3 @@ class Camera:
 
             self.logger.info("Saving image with weather data")
             out.convert('RGB').save(self.config.image.filename)
-

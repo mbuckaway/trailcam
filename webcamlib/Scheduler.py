@@ -9,6 +9,7 @@ from webcamlib.SendAlert import SendAlert
 from webcamlib.Camera import Camera
 from webcamlib.FtpFile import FtpFile
 from webcamlib.TwitterPost import TwitterPost
+from gpiozero import LED
 
 import logging
 import sched, time
@@ -65,6 +66,7 @@ class SchedulerData:
         self.property_voltage = 0.0
         self.property_current = 0.0
         self.property_light = 400
+        self.property_trailopen = False
         self.property_annotation_photo = "This is a test"
         self.property_annotation_twitter = "This is a test"
         self.property_error = []
@@ -159,7 +161,8 @@ class Scheduler:
             'annotate': self.annotate,
             'photo': self.photo,
             'ftpupload': self.ftpupload,
-            'twitterupload': self.twitterupload
+            'twitterupload': self.twitterupload,
+            'trailstatus': self.trailstatus
         }
         self.SIGNALS_TO_NAMES_DICT = dict((getattr(signal, n), n) \
             for n in dir(signal) if n.startswith('SIG') and '_' not in n )
@@ -333,6 +336,33 @@ class Scheduler:
             twitterpost.post()
         else:
             self.logger.warn("Skipping twitter due to low light level")
+
+    def trailstatus(self):
+        self.logger.info("Getting trail status...")
+        restclient = TrailRestClient(self.config)
+        isopen = True
+        try:
+            isopen = restclient.status()
+            if isopen:
+                self.logger.info("Trails are open")
+            else:
+                self.logger.info("Trails are closed")
+                
+            if self.config.ledred.enabled:
+                ledred = LED(self.config.ledred.gpiopin)
+                if isopen:
+                    ledred.off()
+                else:
+                    ledred.on()
+            if self.config.ledgreen.enabled:
+                ledgreen = LED(self.config.ledgreen.gpiopin)
+                if isopen:
+                    ledgreen.off()
+                else:
+                    ledgreen.on()
+            
+        except Exception as e:
+            self.logger.error("Unable to update trail status: %s", str(e))
 
 if __name__ == '__main__':
     # Setup logging to the screen only for testing
