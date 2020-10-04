@@ -1,0 +1,11 @@
+[Unit]
+Description=Enable i2c device drivers
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/busdrivers
+ExecStop=/usr/bin/busdrivers clean
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
