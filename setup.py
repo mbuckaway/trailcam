@@ -19,6 +19,7 @@ setup(name='TrailCam',
             "adafruit-circuitpython-ina219",
             "twilio",
             "python-daemon",
-            "requests"
+            "requests",
+            "thinkspeak"
         ]
 )

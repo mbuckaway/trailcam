@@ -1,5 +1,5 @@
 from webcamlib.Config import Config
-import v4l2capture
+#import v4l2capture
 from PIL import Image, ImageFont, ImageDraw
 from picamera import PiCamera
 import logging
