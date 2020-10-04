@@ -20,6 +20,6 @@ setup(name='TrailCam',
             "twilio",
             "python-daemon",
             "requests",
-            "thinkspeak"
+            "thingspeak"
         ]
 )
