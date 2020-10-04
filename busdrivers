@@ -11,14 +11,25 @@ then
 fi
 
 BUS="/sys/bus/i2c/devices/i2c-1"
-BMP280ID="0x76"
-MP3115ID="0x60"
+#BMP280ID="0x76"
+#MP3115ID="0x60"
+BH1750ID="0x23"
 
 clean()
 {
 	echo "Removing i2c drivers..."
-	echo $BMP280ID > $BUS/delete_device
-	echo $MP3115ID > $BUS/delete_device
+	if [ -n "$BMP280ID" ]
+	then
+		echo $BMP280ID > $BUS/delete_device
+	fi
+	if [ -n "$BMP280ID" ]
+	then
+		echo $MP3115ID > $BUS/delete_device
+	fi
+	if [ -n "$BH1750ID" ]
+	then
+		echo $BH1750ID > $BUS/delete_device
+	fi
 }
 
 install()
@@ -32,6 +43,11 @@ install()
 	then
 		echo "MP3115A2 device enabled at $MP3115ID"
 		echo "mpl3115 $MP3115ID" > $BUS/new_device
+	fi
+	if grep bh1750 /proc/modules > /dev/null
+	then
+		echo "BH1750 enabled on $BH1750ID"
+		echo "bh1750 $BH1750ID" > $BUS/new_device
 	fi
 }
 

@@ -27,7 +27,7 @@
         "voltage":
         {
             "enabled": true,
-            "type": "bh1750",
+            "type": "ina219",
             "address": "0x40",
             "rounding": 1
         }

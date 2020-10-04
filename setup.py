@@ -14,7 +14,6 @@ setup(name='TrailCam',
         install_requires=[
             "ephem",
             "pillow",
-            "v4l2capture",
             "picamera",
             "twython",
             "adafruit-circuitpython-ina219",
