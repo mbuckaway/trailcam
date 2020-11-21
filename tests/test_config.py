@@ -21,6 +21,7 @@ class TestConfigMethods(unittest.TestCase):
         self.assertTrue(self.configFile.sensors.voltage.enabled)
         self.assertEqual(1440, self.configFile.image.width)
         self.assertEqual(810, self.configFile.image.height)
+        self.assertEqual("/var/cache/webcam", self.configFile.image.directory)
         self.assertEqual("webcam", self.configFile.image.filename)
         self.assertEqual("png", self.configFile.image.extension)
         self.assertEqual("/tmp/webcam.png", self.configFile.image.tmpfilename)

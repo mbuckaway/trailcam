@@ -180,6 +180,7 @@ class ConfigImage:
             self.property_tmpfilename = object['tmpfilename']
             self.property_archive = bool(object['archive'])
             self.property_extension = object['extension']
+            self.property_directory = object['directory']
         except KeyError as e:
             raise ConfigError("Image Section: " + str(e.args))
 
@@ -206,6 +207,10 @@ class ConfigImage:
     @property
     def archive(self):
         return self.property_archive
+
+    @property
+    def directory(self):
+        return self.property_directory
 
 class ConfigAnnotate:
     """ Annotate config section """
