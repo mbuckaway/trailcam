@@ -1,0 +1,113 @@
+---
+camera:
+  type: v4l
+  device: "/dev/video0"
+  delay: 2
+  latitude: '43.4873066'
+  longitude: "-80.4841633"
+  elevation: 400
+  rotation: 180
+sensors:
+  temperature:
+    enabled: true
+    type: bmp280
+    sea_level_pressure: 1029
+    device: 1-0076
+    rounding: 1
+  light:
+    enabled: true
+    type: bh1750
+    device: 1-0023
+    rounding: 1
+  voltage:
+    enabled: true
+    type: bh1750
+    address: '0x40'
+    rounding: 1
+ledred:
+  enabled: true
+  gpiopin: 17
+ledgreen:
+  enabled: false
+  gpiopin: 18
+hwmon:
+  shutdown_enabled: false
+  twilio:
+    enabled: true
+    account_sid: ACCOUNT_SID
+    auth_token: AUTH_TOKEN
+    phone_number: "+12262345678"
+  message:
+    warning: KW Geesecam is under voltage! Currently %%VOLTS%%V
+    shutdown: KW Geesecam is dead! Currently %%VOLTS%%V. Shutting down!
+  smslimit: 1800
+  phone_numbers:
+  - "+12262345555"
+  - "+12262345556"
+  min_voltage:
+    warning: 10
+    shutdown: 9.1
+  timefile: "/tmp/trailcamlastcheck.json"
+annotate:
+  enabled: true
+  font: "/usr/share/fonts/truetype/freefont/FreeSans.ttf"
+  size: 18
+  format: 'Hydrocut Status (%%DATE%%): %%TEMP%%C %%LIGHT%%Lux (Internet by @WorldlineCanada)'
+  format_twitter: 'Hydrocut Status: %%TEMP%%C %%LIGHT%%Lux (Internet by @WorldlineCanada)'
+  position: bottom
+image:
+  archive: true
+  width: 1440
+  height: 810
+  filename: "webcam"
+  extension: "png"
+  directory: "/var/cache/webcam"
+  tmpfilename: "/tmp/webcam.png"
+ftp:
+  enabled: true
+  server: servername
+  user: webcam
+  password: password
+  archive_dir: images/webcam
+twitter:
+  enabled: false
+  ConsumerKey: CONSUMER KEY
+  ConsumerSecret: CONSUMER SECRET
+  AccessKey: ACCESS KEY
+  AccessSecret: ACCESS SECRET
+thingspeak:
+  enabled: true
+  writekey: WRITEKEY
+  channelid: 1
+  timeout: 15
+restapi:
+  enabled: true
+  host: http://kwgeesecam.ca
+  camera_id: 1
+  api_key: API_KEY
+trailapi:
+  enabled: true
+  host: https://api.trailstatusapp.com/status?trailId=instagram%7C17841402338843416%7Cdefault
+scheduler:
+  interval: 60
+  processes:
+  - enabled: true
+    description: 'Every Minute: Sensors'
+    count: 1
+    functions:
+    - sensors
+    - senddata
+    - checkvalues
+    - trailstatus
+  - enabled: false
+    description: 'Every 5 Minutes: Take photo and upload'
+    count: 5
+    functions:
+    - annotate
+    - photo
+    - ftpupload
+  - enabled: false
+    description: 'Every hour: Twitter post'
+    count: 60
+    functions:
+    - twitterupload

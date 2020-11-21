@@ -1,10 +1,10 @@
-Pillow: https://github.com/python-pillow/Pillow
+-e git+https://github.com/python-pillow/Pillow#egg=pillow
 ephem
 picamera
 python-daemon
 twilio
-unittest
+unitest
 adafruit-circuitpython-ina219
 thinkspeak
 python-daemon
-
+pyyaml

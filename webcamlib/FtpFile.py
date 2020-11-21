@@ -77,4 +77,3 @@ class FtpFile:
         else:
             self.logger.warn("FTP upload disabled")
             self.data.lasterror = "FTP upload disabled"
-

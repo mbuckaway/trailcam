@@ -4,7 +4,7 @@ import logging
 
 class TestConfigMethods(unittest.TestCase):
     def setUp(self):
-        self.configFile = Config('tests/config-test.json')
+        self.configFile = Config('tests/config-test.yml')
 
     def tearDown(self):
         self.configFile.dispose()
@@ -21,7 +21,9 @@ class TestConfigMethods(unittest.TestCase):
         self.assertTrue(self.configFile.sensors.voltage.enabled)
         self.assertEqual(1440, self.configFile.image.width)
         self.assertEqual(810, self.configFile.image.height)
-        self.assertEqual("/tmp/webcam.jpg", self.configFile.image.filename)
+        self.assertEqual("webcam", self.configFile.image.filename)
+        self.assertEqual("png", self.configFile.image.extension)
+        self.assertEqual("/tmp/webcam.png", self.configFile.image.tmpfilename)
         self.assertEqual("servername", self.configFile.ftp.server)
         self.assertEqual("CONSUMER SECRET", self.configFile.twitter.consumersecret)
 
@@ -46,7 +48,7 @@ class TestConfigMethods(unittest.TestCase):
         process = self.configFile.scheduler.processes[0]
         self.assertTrue(process.enabled)
         self.assertEqual(1, process.count)
-        self.assertEqual(3, len(process.functions))
+        self.assertEqual(4, len(process.functions))
         self.assertEqual("sensors", process.functions[0])
         self.assertEqual("senddata", process.functions[1])
         self.assertEqual("checkvalues", process.functions[2])

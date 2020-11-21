@@ -1,15 +1,10 @@
 # Trailcam
 
-This program is a simple Webcam Utility for a Raspberry PI. Currently, the system runs on a PI Zero W and is connected to a 4G modem via WIFI, connected to a 12V to USB power supply connected to a 12V car battery. The entire thing was put in a waterproof box and put into the forest at the Hydrocut (http://thehydrocut.ca)
+This program is a simple Webcam Utility for a Raspberry PI. Currently, the system runs on a PI Zero W and is connected to a 4G modem via WIFI, connected to a 24V solar charge systemt. The device is current running as security camera at the Hydrocut (http://thehydrocut.ca) mountain bike trails as part of the Trail Monitoring System.
 
-The utility is meant to be run on a cron job and can post to a ftp site and a twitter account. It also has the ability to read temperature and pressure from the BMP280 temperature sensor on the I2C bus. All things are configurable in the config.json config file.
+The utility reads a 1 Wire Temperature sensor, light sensor, and voltage/current sensor and uploads the data to Thingspeak. Photos are captured and stored on the SDCARD for later retrieval. Uploading by FTP us also possible. All things are configurable in the config.yml config file.
 
-This utility is work in progress. Features to be added:
-- voltage and current sensors to monitor the state of the 12v battery system (possible current sensor on the solar charge controller)
-- LED on a GPIO pin to len people know when a photo is about to be taken
-- relay controller to control a 12V floodlight for night time shots (currently, night shots produce nothing)
-- AI image processing to detect when the scene is empty, has a hiker, or has a mountain bike (or number  of mountain bikes).
-
+This project will be depreciated in the future and replaced with an ESP32 device. It is kinda silly to run a complete linux OS to run one Python script...but the was the original design.
 
 # Linux Dependancies for Video for Linux
 
@@ -19,7 +14,7 @@ The python code can support either the picamera or v4l. Additional packages are 
 sudo apt install libv4l-dev
 ```
 
-As of RPi based on Debian 10, the v2l python package does not compile and some work may be required to get it to work again. 
+As of RPi based on Debian 10, the v2l python package does not compile and some work may be required to get it to work again. Currently, the picamera is recommended.
 
 # Kernel Module installation
 
@@ -35,6 +30,18 @@ The kernel modules themselves can be be built by reading:
 
 https://github.com/notro/rpi-source/wiki/Examples-on-how-to-build-various-modules
 
+Basically, once the kernel source is installed:
+* cd $HOME/linux
+* Run make menuconfig to enable the required drivers. The bh1750 is disabled by default. Most of the rest are already enabled.
+* Run: make M=drivers/iio/light modules
+* Run: sudo make M=drivers/iio/light modules_install
+* Run: make M=drivers/hwmon modules
+* Run: sudo make M=drivers/hwmon modules_install
+* Run: make M=drivers/w1 modules
+* Run: sudo make M=drivers/w1 modules_install
+* Run: depmod -a
+
+And because the kernel changes on updates, you will have to run the above any time apt upgrade is run and the kernel gets updated.
 
 For this project, the following devices are supported:
 i2c:
@@ -51,11 +58,9 @@ ina2xxx - voltage sensor
 
 Additional sensors can be added by extending the LightSensor.py and TemperatureSensor.py classes.
 
-The bh1750 module is not included with stock kernel and must be built.
-
 Also, you must update /etc/modules file as follows:
 
-```
+```bash
 i2c-dev
 #bmp280
 #bmp280-i2c
@@ -66,7 +71,6 @@ ina2xx-adc
 ```
 
 The drivers required for each sensor must be specified here to make sure they are loaded at boot time.
-
 
 ## Services
 
@@ -81,13 +85,13 @@ Copy the above files to /etc/systemd/system.
 
 Then run:
 
-```
+```bash
 sudo systemctl enable busdrivers
 sudo systemctl enable trailcam
 ```
 
 ## Config
 
-The standard location for the config file is in /etc/trailcam. Copy the config-sample.json to /etc/trailcam/config.json and edit it accordingly. 
+The standard location for the config file is in /etc/trailcam. Copy the config-sample.yml to /etc/trailcam/config.yml and edit it accordingly.
 
 BE CAREFUL: The voltage sensor, if enabled, can cause the system to halt on low power conditions. However, if you are running the system from a AC adapter lower then the battery voltage, the system will start, and then suddenly halt. It is important to only enable the low voltage shutdown once the system is in the field; otherwise, it may be required to pull the SD card from the RPi, and edit the trailcam config offline to stop the unwanted shutdowns.

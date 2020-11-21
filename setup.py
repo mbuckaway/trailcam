@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='TrailCam',
-        version='1.3',
+        version='1.4',
         description='Webcam Library with FTP and Twitter',
         author='Mark Buckaway',
         author_email='mark@buckaway.ca',
@@ -20,6 +20,7 @@ setup(name='TrailCam',
             "twilio",
             "python-daemon",
             "requests",
-            "thingspeak"
+            "thingspeak",
+            'pyyaml'
         ]
 )

@@ -1,4 +1,4 @@
-import json
+import yaml
 import logging
 from webcamlib.Exceptions import ConfigError
 
@@ -177,6 +177,9 @@ class ConfigImage:
             self.property_width = object['width']
             self.property_height = object['height']
             self.property_filename = object['filename']
+            self.property_tmpfilename = object['tmpfilename']
+            self.property_archive = bool(object['archive'])
+            self.property_extension = object['extension']
         except KeyError as e:
             raise ConfigError("Image Section: " + str(e.args))
 
@@ -191,6 +194,18 @@ class ConfigImage:
     @property
     def filename(self):
         return self.property_filename
+
+    @property
+    def extension(self):
+        return self.property_extension
+
+    @property
+    def tmpfilename(self):
+        return self.property_tmpfilename
+
+    @property
+    def archive(self):
+        return self.property_archive
 
 class ConfigAnnotate:
     """ Annotate config section """
@@ -517,8 +532,8 @@ class Config:
 
     def __init__(self, filename, ftpenabled = False, twitterenabled = False):
         self.filename = filename
-        with open(filename) as json_data:
-            self.config = json.load(json_data)
+        with open(filename) as config_data:
+            self.config = yaml.full_load(config_data)
         # Load the sections of the config
         try:
             self.property_camera = ConfigCamera(self.config['camera'])

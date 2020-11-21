@@ -18,3 +18,4 @@ trailcam.log.5
 *.pyc
 /dist/
 /*.egg-info
+env/
