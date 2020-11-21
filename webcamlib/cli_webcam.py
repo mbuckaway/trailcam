@@ -25,7 +25,7 @@ def main_loop(config):
 def main():
     parser = argparse.ArgumentParser(description='Trail Webcam utility')
     parser.add_argument('-L', '--loglevel', default='INFO', help='logging level (default INFO)')
-    parser.add_argument('-c', '--config', default='config.json', help='config filename')
+    parser.add_argument('-c', '--config', default='config.yml', help='config filename')
     parser.add_argument('-f', '--ftp', action='store_false', help='disable ftp')
     parser.add_argument('-t', '--twitter', action='store_false', help='disable twitter')
     parser.add_argument('-F', '--foreground', action='store_false', help='run in foreground')

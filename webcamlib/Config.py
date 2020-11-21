@@ -350,8 +350,7 @@ class ConfigHWMon:
             self.property_smslimit = object['smslimit']
 
             # Don't bother with the phone numbers if SMS is disabled
-            if (self.property_twilio_enabled):
-                self.property_phone_numbers = object['phone_numbers']
+            self.property_phone_numbers = object['phone_numbers']
 
             minvoltage_section = object['min_voltage']
             self.property_warning_voltage = minvoltage_section['warning']

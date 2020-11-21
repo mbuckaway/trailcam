@@ -307,8 +307,9 @@ class Scheduler:
             (self.data.voltage > 0) and 
             (self.data.voltage < self.config.hwmon.shutdown_voltage)):
             self.logger.warn("Supply voltage below shutdown level! ({}V)".format(self.data.voltage))
-            sendalert = SendAlert(self.config.hwmon)
-            sendalert.SendShutdown(self.data.voltage)
+            if (self.config.hwmon.twilio_enabled):
+                sendalert = SendAlert(self.config.hwmon)
+                sendalert.SendShutdown(self.data.voltage)
             if (self.config.hwmon.shutdown_enabled):
                 self.logger.warn("Forcing system to halt and then we exit!")
                 # This will fail if we are not root, but....
