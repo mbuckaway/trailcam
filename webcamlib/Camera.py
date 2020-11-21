@@ -82,6 +82,8 @@ class Camera:
                 if self.config.image.archive:
                     now = datetime.datetime.now()
                     pathobj = PosixPath(self.config.image.directory).joinpath(now.strftime("%Y%m/%d"))
+                    if not path.exists(pathobj.as_posix()):
+                        path.mkdir(pathobj.as_posix(), parents=True)
                     fullfilename =  self.config.image.filename + "-" + now.strftime("%Y%m%d-%H%M%S") + "." + self.config.image.extension
                     filename = PosixPath(pathobj).joinpath(fullfilename).as_posix()
                     self.logger.info("Achiving image to: " + filename)
