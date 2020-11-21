@@ -82,7 +82,7 @@ class Camera:
                 if self.config.image.archive:
                     now = datetime.datetime.now()
                     pathobj = PosixPath(self.config.image.directory).joinpath(now.strftime("%Y%m/%d"))
-                    fullfilename =  self.config.image.filename + "-" + now.strftime("%Y%m%d-%H%M%S") + self.config.image.extension
+                    fullfilename =  self.config.image.filename + "-" + now.strftime("%Y%m%d-%H%M%S") + "." + self.config.image.extension
                     filename = PosixPath(pathobj).joinpath(fullfilename).as_posix()
                     self.logger.info("Achiving image to: " + filename)
                 camera.capture(filename, format=imagetype, use_video_port=False)
