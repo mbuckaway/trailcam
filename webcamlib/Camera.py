@@ -6,8 +6,8 @@ import logging
 import ephem
 import datetime
 import math
-from pathlib import PosixPath
 import select
+import os
 import time
 
 class Camera:
@@ -19,8 +19,8 @@ class Camera:
         self.logger = logging.getLogger('camera')
         self.config = config
         self.data = data
-        fontpath = PosixPath(config.annotate.font)
-        if (not fontpath.exists()):
+        fontpath = config.annotate.font
+        if not os.path.exists(fontpath):
             self.logger.error("Font path " + config.annotate.font + " does not exist. Annotation disabled")
             self.config.annotate.enabled = False
 
@@ -73,7 +73,6 @@ class Camera:
                         camera.exposure_mode = 'nightpreview'
                         camera.iso = 1200
                         camera.brightness = 60
-                path = PosixPath(self.config.image.filename)
                 # Assume jpg
                 imagetype = "jpeg"
                 if self.config.image.extension.upper() == "PNG":
@@ -81,11 +80,11 @@ class Camera:
                 filename = self.config.image.filename
                 if self.config.image.archive:
                     now = datetime.datetime.now()
-                    pathobj = PosixPath(self.config.image.directory).joinpath(now.strftime("%Y%m/%d"))
-                    if not path.exists(pathobj.as_posix()):
-                        path.mkdir(pathobj.as_posix(), parents=True)
+                    pathobj = os.path.join(self.config.image.directory, now.strftime("%Y%m/%d"))
+                    if not os.path.exists(pathobj):
+                        os.makedirs(pathobj)
                     fullfilename =  self.config.image.filename + "-" + now.strftime("%Y%m%d-%H%M%S") + "." + self.config.image.extension
-                    filename = PosixPath(pathobj).joinpath(fullfilename).as_posix()
+                    filename = os.path.join(pathobj, fullfilename)
                     self.logger.info("Achiving image to: " + filename)
                 camera.capture(filename, format=imagetype, use_video_port=False)
         except Exception as e:
