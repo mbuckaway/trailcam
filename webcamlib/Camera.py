@@ -80,10 +80,11 @@ class Camera:
                     imagetype = "png"
                 filename = self.config.image.filename
                 if self.config.image.archive:
+                    now = datetime.datetime.now()
                     pathobj = PosixPath(self.config.image.directory).joinpath(now.strftime("%Y%m/%d"))
                     fullfilename =  self.config.image.filename + "-" + now.strftime("%Y%m%d-%H%M%S") + self.config.image.extension
                     filename = PosixPath(pathobj).joinpath(fullfilename).as_posix()
-                    self.logger("Achiving image to: " + filename)
+                    self.logger.info("Achiving image to: " + filename)
                 camera.capture(filename, format=imagetype, use_video_port=False)
         except Exception as e:
             self.logger.error("Camera was unable to capture an image: " + str(e.args))
